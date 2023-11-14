@@ -1,23 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.UIElements;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    // Player Movement
+    public CharacterController CController;
+    public Transform groundCheckStart;
+    public Transform groundCheckEnd;
+    public float groundDistance = 0.1f;
+    public float movementSpeed = 3f;
+    public float jumpForce = 2.4f;
+    public float gravity = -1f;
+    public LayerMask groundMask;
+    public bool isGrounded = true;
 
-    /*
-     * Player Movement And RigidBody
-     */
+    private Vector3 velocity;
+    private Rigidbody rigBody;
 
-    Rigidbody rigBody;
-    [SerializeField] float movementSpeed = 3f;
-    [SerializeField] float jumpForce = 4f;
-
-
-    /*
-     * Camera Movement
-     */
+    // Camera Movement
     public float sensitivity = 2f;
     public bool invertMouse = false;
 
@@ -30,7 +33,16 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         CameraMovement();
-        PlayerMove();
+        float horizontalInput = Input.GetAxis("Horizontal") * Time.deltaTime * movementSpeed;
+        float verticalInput = Input.GetAxis("Vertical") * Time.deltaTime * movementSpeed;
+
+        transform.Translate(horizontalInput, 0, verticalInput);
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            rigBody.AddForce(new Vector3(0, 3f, 0), ForceMode.Impulse);
+            isGrounded = false;
+        }
     }
 
     private void CameraMovement() 
@@ -61,21 +73,12 @@ public class PlayerMovement : MonoBehaviour
         transform.rotation = Quaternion.Euler(clampedXRotation, transform.eulerAngles.y, 0f);
     }
 
-    private void PlayerMove()
+    private void OnCollisionEnter(Collision collision)
     {
-        // Player Movement
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-
-        Vector3 moveDirection = new Vector3(horizontalInput * movementSpeed, rigBody.velocity.y, verticalInput * movementSpeed).normalized;
-
-        // rigBody.velocity = new Vector3(horizontalInput * movementSpeed, rigBody.velocity.y, verticalInput * movementSpeed);
-
-        transform.Translate(moveDirection * movementSpeed * Time.deltaTime, Space.Self);
-
-        if (Input.GetKeyDown("space"))
+        if (collision.gameObject.name == "Floor")
         {
-            rigBody.velocity = new Vector3(rigBody.velocity.x, 3f, rigBody.velocity.z);
+            isGrounded = true;
+            print("Landed");
         }
     }
 }

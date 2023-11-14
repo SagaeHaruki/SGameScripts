@@ -9,17 +9,18 @@ public class npc01 : MonoBehaviour
 {
     public Transform[] waypoints;
     public float moveSpeed = 3f;
-    public float minDistance = 0.2f;
+    public float minDistance = 0.4f;
     public float minStopDuration = 1f;
     public float maxStopDuration = 3f;
 
-    private bool isWaiting = false;
     private int currentWaypoint = 0;
+    private bool isWaiting = false;
     private float waitTimer = 0f;
     private float stopDuration = 0f;
 
     void Start()
     {
+        MoveToWaypoint();
     }
 
     void Update()
@@ -27,17 +28,46 @@ public class npc01 : MonoBehaviour
         if (waypoints.Length == 0)
             return;
 
-        transform.position = Vector3.MoveTowards(transform.position, waypoints[currentWaypoint].position, moveSpeed * Time.deltaTime);
-
-        if (Vector3.Distance(transform.position, waypoints[currentWaypoint].position) <= minDistance)
+        if (isWaiting)
         {
-            currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
-            Thread.Sleep(1000);
+            WaitAtWaypoint();
         }
-
+        else
+        {
+            MoveToWaypoint();
+        }
         RotateTowardsWaypoint();
     }
 
+    void MoveToWaypoint()
+    {
+        // This will move the npc towards the set waypoint
+        transform.position = Vector3.MoveTowards(transform.position, waypoints[currentWaypoint].position, moveSpeed * Time.deltaTime);
+
+        // This will check if the npc is close to the waypoint
+        if (Vector3.Distance(transform.position, waypoints[currentWaypoint].position) <= minDistance)
+        {
+            StopAtWaypoint();
+        }
+    }
+
+    void StopAtWaypoint()
+    {
+        isWaiting = true;
+        stopDuration = Random.Range(minStopDuration, maxStopDuration); 
+        waitTimer = 0f;
+    }
+
+    void WaitAtWaypoint()
+    {
+        waitTimer += Time.deltaTime;
+
+        if (waitTimer >= stopDuration)
+        {
+            isWaiting = false;
+            currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
+        }
+    }
 
     void RotateTowardsWaypoint()
     {
