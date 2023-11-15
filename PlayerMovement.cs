@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Unity.VisualScripting;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -7,78 +8,101 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     // Player Movement
-    public CharacterController CController;
-    public Transform groundCheckStart;
-    public Transform groundCheckEnd;
-    public float groundDistance = 0.1f;
-    public float movementSpeed = 3f;
-    public float jumpForce = 2.4f;
-    public float gravity = -1f;
-    public LayerMask groundMask;
-    public bool isGrounded = true;
+    Rigidbody rigBody;
+    // Acces the player Controller
+    private CharacterController CController;
 
-    private Vector3 velocity;
-    private Rigidbody rigBody;
+    [SerializeField]
+    private float moveSpeed = 2.7f;
 
-    // Camera Movement
-    public float sensitivity = 2f;
-    public bool invertMouse = false;
+    [SerializeField]
+    private float jumpHeight = 0.25f;
 
+    [SerializeField]
+    private float rotationSpeed = 2.5f;
 
+    [SerializeField]
+    private float gravityStr = -10.81f;
+
+    [SerializeField]
+    private Camera playerCamera;
+
+    [SerializeField]
+    private Transform mainPlayerCam;
+
+    private bool atGround;
+    private Vector3 playerVelocity;
+    private Vector3 dashDirection;
+    private Quaternion currentRot;
+    
     void Start()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         rigBody = GetComponent<Rigidbody>();
+        CController = GetComponent<CharacterController>();
+
+        CController.skinWidth = 0.0001f;
+        CController.minMoveDistance = 0f;
+        CController.radius = 0.5f;
+        playerCamera = Camera.main;
+        mainPlayerCam = Camera.main.transform;
     }
 
     void Update()
     {
-        CameraMovement();
-        float horizontalInput = Input.GetAxis("Horizontal") * Time.deltaTime * movementSpeed;
-        float verticalInput = Input.GetAxis("Vertical") * Time.deltaTime * movementSpeed;
-
-        transform.Translate(horizontalInput, 0, verticalInput);
-
-        if (Input.GetButtonDown("Jump") && isGrounded)
-        {
-            rigBody.AddForce(new Vector3(0, 3f, 0), ForceMode.Impulse);
-            isGrounded = false;
-        }
+        MovementPlayer();
     }
 
-    private void CameraMovement() 
+    private void MovementPlayer()
     {
-        // Mouse Movement
+        dashDirection = transform.forward;
+        atGround = CController.isGrounded;
 
-        float MouseX = Input.GetAxis("Mouse X");
-        float MouseY = Input.GetAxis("Mouse Y");
-
-        MouseX *= sensitivity;
-        MouseX *= sensitivity;
-
-        if (invertMouse == true)
+        if (atGround && playerVelocity.y < 0)
         {
-            MouseY *= -1;
+            playerVelocity.y = 0f;
         }
 
-        transform.Rotate(Vector3.up, MouseX);
-        transform.Rotate(Vector3.left, MouseY);
+        // Keyboard input
+        float horizontalAxis = Input.GetAxis("Horizontal");
+        float verticalAxis = Input.GetAxis("Vertical");
 
-        // This will prevent tilting of the Player
-        float currentXRotation = transform.eulerAngles.x;
-        if (currentXRotation > 180f)
+        // Get the Camera Direction then translate it to where the front of player is
+        Vector3 movementInput = mainPlayerCam.forward * verticalAxis + mainPlayerCam.right * horizontalAxis;
+        Vector3 movementDirection = movementInput.normalized;
+        movementDirection.y = 0f;
+
+        // This moves the player
+        CController.Move(movementDirection.normalized * moveSpeed * Time.deltaTime);
+
+        if (movementDirection != Vector3.zero)
         {
-            currentXRotation -= 360f;
+            Quaternion toRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
+
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
         }
-        float clampedXRotation = Mathf.Clamp(currentXRotation, -80f, 80f);
-        transform.rotation = Quaternion.Euler(clampedXRotation, transform.eulerAngles.y, 0f);
+
+
+        // Disable the jump if the player is on mid air
+        if (Input.GetButtonDown("Jump") && atGround)
+        {
+            playerVelocity.y += Mathf.Sqrt(jumpHeight * -5.0f * gravityStr);
+            atGround = false;
+        }
+        // Gravity
+        playerVelocity.y += gravityStr * Time.deltaTime;
+        CController.Move(playerVelocity * Time.deltaTime);
     }
 
+
+    // This will enable the player to jump again
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.name == "Floor")
         {
-            isGrounded = true;
-            print("Landed");
+            atGround = true;
         }
     }
 }
