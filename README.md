@@ -11,6 +11,8 @@
 - Removed the player collider (Doesn't need this)
 - Removed the old camera movement (Am currently using a cinemachine for the camera movement)
 - Added a camera zoom script
+- Added smoothening to the camera zoom script
+
 
 
 [Nov. 15, 2023]
