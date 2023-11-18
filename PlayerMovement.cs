@@ -4,105 +4,232 @@ using System.Threading;
 using Unity.VisualScripting;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerMovement : MonoBehaviour
 {
-    // Player Movement
-    Rigidbody rigBody;
-    // Acces the player Controller
-    private CharacterController CController;
+    // Serizalize field allows you to change the value on unity
 
+    #region Variables: Character Speed & Stamina
+    [SerializeField] 
+    private float charSpeed = 3.2f;
     [SerializeField]
-    private float moveSpeed = 2.7f;
+    public float maxStamina = 100f;
+    #endregion
 
+    #region Variables: Camera Motions
+    // Character & Camera
+    public float turnSmoothing = 0.1f; // Player direction smoothing
+    public Transform CameraAngle; // Default camera angle
+    float smoothingVelocity;
+    #endregion
+
+    #region Variables: Character Control
+    public CharacterController charControl;
+    #endregion
+
+    #region Variables: Walking, Running, Sprinting & Jumping
+    public int isWalking = 1;
+    public bool isSprinting;
+    public bool isJumping;
     [SerializeField]
-    private float jumpHeight = 0.25f;
+    private bool isRunning = true;
+    #endregion
 
+    #region Variables: Stamina Depletion & Regeneration
+    public float currentStamina;
+    public float staminaRegen = 12f;
+    public float staminaDeplete = 15f;
+    #endregion
+
+    #region Variables: Gravity Physics
     [SerializeField]
-    private float rotationSpeed = 2.5f;
-
+    public float jumpSpeed = 5.0f;
     [SerializeField]
-    private float gravityStr = -10.81f;
-
+    public float gravity = 20.0f;
     [SerializeField]
-    private Camera playerCamera;
+    private float verticalSpeed = 0.0f;
+    #endregion
 
+    #region Value: Ground Distance & Mask
     [SerializeField]
-    private Transform mainPlayerCam;
+    public float groundDistance = 0.2f;
+    public LayerMask groundMask;
+    #endregion
 
-    private bool atGround;
-    private Vector3 playerVelocity;
-    private Vector3 dashDirection;
-    private Quaternion currentRot;
-    
-    void Start()
+    #region Variables: Character Dashing
+    [SerializeField]
+    public float dashDuration = 0.2f; // Duration of the dash
+    [SerializeField]
+    public float dashCooldown = 1.2f; // Cooldown between dashes
+    [SerializeField]
+    public float dashSpeed = 8.2f; // Dash Speed
+    private float cooldownTimer = 0.0f;
+    private bool isDashing = false;
+    #endregion
+
+
+    private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        currentStamina = maxStamina;
+        // Hides the cursor
         Cursor.visible = false;
-
-        rigBody = GetComponent<Rigidbody>();
-        CController = GetComponent<CharacterController>();
-
-        CController.skinWidth = 0.0001f;
-        CController.minMoveDistance = 0f;
-        CController.radius = 0.5f;
-        playerCamera = Camera.main;
-        mainPlayerCam = Camera.main.transform;
+        // Lock the cursor to the center of the screen
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
     {
-        MovementPlayer();
+        GravityAndJump();
+        SprintingStatus();
+        RunningToggle();
+
+        /*
+         * Keyboard inputs (wasd or arrows)
+         */
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+
+        // Get the direction based on the movement, always normalize movement
+        Vector3 direction = new Vector3 (horizontal, 0f, vertical).normalized;
+
+        // Direction Movement
+        if (direction.magnitude >= 0.1f)
+        {
+            // Calculate the direction of the player
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
+            // This will smoothen the rotation of the angle (More math)
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
+            // Rotates the player based on the direction
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
+
+            // Direction base on the camera angle
+            Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            // This will move the character
+            charControl.Move(newDirection.normalized * charSpeed * Time.deltaTime);
+        }
     }
 
-    private void MovementPlayer()
+    void GravityAndJump()
     {
-        dashDirection = transform.forward;
-        atGround = CController.isGrounded;
-
-        if (atGround && playerVelocity.y < 0)
+        if (charControl.isGrounded && verticalSpeed < 0.0f)
         {
-            playerVelocity.y = 0f;
+            verticalSpeed = -1.0f;
+        }
+        else
+        {
+            verticalSpeed -= gravity * Time.deltaTime;
         }
 
-        // Keyboard input
-        float horizontalAxis = Input.GetAxis("Horizontal");
-        float verticalAxis = Input.GetAxis("Vertical");
-
-        // Get the Camera Direction then translate it to where the front of player is
-        Vector3 movementInput = mainPlayerCam.forward * verticalAxis + mainPlayerCam.right * horizontalAxis;
-        Vector3 movementDirection = movementInput.normalized;
-        movementDirection.y = 0f;
-
-        // This moves the player
-        CController.Move(movementDirection.normalized * moveSpeed * Time.deltaTime);
-
-        if (movementDirection != Vector3.zero)
+        // Make the Player Jump
+        if (Input.GetButtonDown("Jump") && !isJumping)
         {
-            Quaternion toRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
-
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+            isJumping = true;
+            verticalSpeed = jumpSpeed;
         }
 
+        Vector3 moveDirection = new Vector3(0, verticalSpeed, 0);
+        charControl.Move(moveDirection * Time.deltaTime);
 
-        // Disable the jump if the player is on mid air
-        if (Input.GetButtonDown("Jump") && atGround)
+        // Reset the jump flag after the character is grounded again
+        if (charControl.isGrounded)
         {
-            playerVelocity.y += Mathf.Sqrt(jumpHeight * -5.0f * gravityStr);
-            atGround = false;
+            isJumping = false;
         }
-        // Gravity
-        playerVelocity.y += gravityStr * Time.deltaTime;
-        CController.Move(playerVelocity * Time.deltaTime);
     }
 
-
-    // This will enable the player to jump again
-    private void OnCollisionEnter(Collision collision)
+    void RunningToggle()
     {
-        if (collision.gameObject.name == "Floor")
+        // Running and Walking key toggle
+        if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            atGround = true;
+            if (isRunning == false)
+            {
+                isRunning = true;
+                return;
+            }
+            else if (isRunning == true)
+            {
+                isRunning = false;
+                return;
+            }
+
         }
+    }
+
+    /*
+     * Sprinting & Stamina Physics
+     */
+
+    void SprintingStatus()
+    {
+
+        // Stamina regeneration over time when not performing actions or if the stamina reaches zero
+        if (!isSprinting && currentStamina < maxStamina)
+        {
+            currentStamina = Mathf.Min(maxStamina, currentStamina + staminaRegen * Time.deltaTime);
+        }
+
+        // Simulating a player action that consumes stamina (e.g., sprinting)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && currentStamina > 0 && cooldownTimer <= 0.0f)
+        {
+            isSprinting = true;
+
+            // Checks if the player is on the ground
+            if(charControl.isGrounded)
+            {
+                // Starts the dash if its on the ground
+                isDashing = true;
+                cooldownTimer = dashCooldown;
+                StartCoroutine(Dash());
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.LeftShift) || currentStamina <= 0)
+        {
+            isSprinting = false;
+        }
+
+        // This reduces the stamina
+        if (isSprinting)
+        {
+            currentStamina -= staminaDeplete * Time.deltaTime;
+        }
+
+        // This increases the character speed
+        if (isSprinting == true)
+        {
+            charSpeed = 6.2f;
+        }
+        else if (isSprinting == false && isRunning == true)
+        {
+            // Set the character speed to the running speed after sprinting
+            charSpeed = 4.2f;
+        }
+        else
+        {
+            // Set the character speed to the walking speed after sprinting
+            charSpeed = 3.2f;
+        }
+
+        // Cooldown for the dash
+        if (cooldownTimer > 0.0f)
+        {
+            cooldownTimer -= Time.deltaTime;
+        }
+    }
+    private System.Collections.IEnumerator Dash()
+    {
+        // Starts the dash time upon key press
+        float startTime = Time.time;
+        Vector3 dashDirection = transform.forward; // Change to your desired direction
+
+        while (Time.time < startTime + dashDuration)
+        {
+            // Starts the dash movement
+            charControl.Move(dashDirection * dashSpeed * Time.deltaTime);
+            yield return null;
+        }
+        isDashing = false;
     }
 }
