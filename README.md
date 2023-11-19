@@ -10,6 +10,7 @@
 <h1>Current Changes</h1>
 
 [Nov. 19, 2023]
+- Added Characters & Terrain (On Development)
 - Animations Introduced
 - Added Toggle Cursor
 - On Cursor toggled, the camera movement is disabled
