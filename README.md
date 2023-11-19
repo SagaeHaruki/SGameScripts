@@ -12,6 +12,7 @@
 [Nov. 19, 2023]
 - Animations Introduced
 - Added Toggle Cursor
+- On Cursor toggled, the camera movement is disabled
 - Removed Dashing Ability
 
 <h1>Previous Changes</h1>
