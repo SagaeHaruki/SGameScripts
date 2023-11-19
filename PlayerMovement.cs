@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -24,8 +25,11 @@ public class PlayerMovement : MonoBehaviour
     float smoothingVelocity;
     #endregion
 
-    #region Variables: Character Control
+    #region Variables: Character Control & Camera
+    [SerializeField]
     public CharacterController charControl;
+    public CinemachineFreeLook freelookCam;
+    private bool cameraEnabled = true;
     #endregion
 
     #region Variables: Walking, Running, Sprinting & Jumping
@@ -68,9 +72,14 @@ public class PlayerMovement : MonoBehaviour
     private bool isDashing = false;
     #endregion
 
+    #region Variables: Animation
+    private Animator animator;
+    #endregion
+
 
     private void Start()
     {
+        animator = GetComponent<Animator>();
         currentStamina = maxStamina;
         // Hides the cursor
         Cursor.visible = false;
@@ -107,7 +116,51 @@ public class PlayerMovement : MonoBehaviour
             Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
             // This will move the character
             charControl.Move(newDirection.normalized * charSpeed * Time.deltaTime);
+            animator.SetBool("isWalking_", true);
         }
+        else
+        {
+            animator.SetBool("isWalking_", false);
+        }
+
+        UnhideCursor();
+    }
+
+    void UnhideCursor()
+    {
+        // Show or Hide cursor on Keypress and KeyRelease
+        // Stops the camera movement when the key is pressed
+        if (Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            // This Disables the camera
+            cameraEnabled = false;
+            // Unhides the cursor
+            Cursor.visible = true;
+            // Unlocks the cursor to the center of the screen
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else if(Input.GetKeyUp(KeyCode.LeftAlt))
+        {
+            // This Enables the Camera
+            cameraEnabled = true;
+            // Hides the cursor
+            Cursor.visible = true;
+            // Lock the cursor to the center of the screen
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+
+        if (freelookCam != null)
+        {
+            CinemachineCore.GetInputAxis = GetInputAxis;
+            // Disable or Enable the Axis Input for the camera
+            freelookCam.m_XAxis.m_InputAxisName = cameraEnabled ? "Mouse X" : "";
+            freelookCam.m_YAxis.m_InputAxisName = cameraEnabled ? "Mouse Y" : "";
+        }
+    }
+
+    private float GetInputAxis(string axisName)
+    {
+        return cameraEnabled ? Input.GetAxis(axisName) : 0f;
     }
 
     void GravityAndJump()
@@ -174,15 +227,14 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftShift) && currentStamina > 0 && cooldownTimer <= 0.0f)
         {
             isSprinting = true;
-
-            // Checks if the player is on the ground
-            if(charControl.isGrounded)
-            {
-                // Starts the dash if its on the ground
-                isDashing = true;
-                cooldownTimer = dashCooldown;
-                StartCoroutine(Dash());
-            }
+            //// Checks if the player is on the ground
+            //if(charControl.isGrounded)
+            //{
+            //    // Starts the dash if its on the ground
+            //    isDashing = true;
+            //    cooldownTimer = dashCooldown;
+            //    StartCoroutine(Dash());
+            //}
         }
 
         if (Input.GetKeyUp(KeyCode.LeftShift) || currentStamina <= 0)
@@ -199,6 +251,7 @@ public class PlayerMovement : MonoBehaviour
         // This increases the character speed
         if (isSprinting == true)
         {
+            // Set the character speed to the sprinting speed
             charSpeed = 6.2f;
         }
         else if (isSprinting == false && isRunning == true)
@@ -218,18 +271,18 @@ public class PlayerMovement : MonoBehaviour
             cooldownTimer -= Time.deltaTime;
         }
     }
-    private System.Collections.IEnumerator Dash()
-    {
-        // Starts the dash time upon key press
-        float startTime = Time.time;
-        Vector3 dashDirection = transform.forward; // Change to your desired direction
+    //private System.Collections.IEnumerator Dash()
+    //{
+    //    // Starts the dash time upon key press
+    //    float startTime = Time.time;
+    //    Vector3 dashDirection = transform.forward; // Change to your desired direction
 
-        while (Time.time < startTime + dashDuration)
-        {
-            // Starts the dash movement
-            charControl.Move(dashDirection * dashSpeed * Time.deltaTime);
-            yield return null;
-        }
-        isDashing = false;
-    }
+    //    while (Time.time < startTime + dashDuration)
+    //    {
+    //        // Starts the dash movement
+    //        charControl.Move(dashDirection * dashSpeed * Time.deltaTime);
+    //        yield return null;
+    //    }
+    //    isDashing = false;
+    //}
 }
