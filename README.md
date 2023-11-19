@@ -13,6 +13,7 @@
 - Animations Introduced
 - Added Toggle Cursor
 - On Cursor toggled, the camera movement is disabled
+- Changes to Sprint, Running and Walking Speed
 - Removed Dashing Ability
 
 <h1>Previous Changes</h1>
