@@ -9,13 +9,18 @@
 
 <h1>Current Changes</h1>
 
+[Nov. 19, 2023]
+- Animations Introduced
+- Added Toggle Cursor
+- Removed Dashing Ability
+
+<h1>Previous Changes</h1>
+
 [Nov. 18, 2023]
 - Removed the player collider (Doesn't need this)
 - Removed the old camera movement (Am currently using a cinemachine for the camera movement)
 - Added a camera zoom script
 - Added smoothening to the camera zoom script
-
-<h1>Previous Changes</h1>
 
 [Nov. 15, 2023]
 - Fixing the camera movements
