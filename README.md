@@ -12,8 +12,9 @@
 [Nov. 20, 2023]
 - Added Minimap & Stamina bar
 - Added Dynamic color bases on current stamina
-- Added player navigation icon & custom minimap icon
-
+- Added player navigation icon, camera direction icon, and custom minimap icon
+- Player icon moves based on the players direction (not camera)
+- Camera icon moves based on the camera on where it is poiting
 
 <h1>Previous Changes</h1>
 
