@@ -9,6 +9,12 @@
 
 <h1>Current Changes</h1>
 
+[Nov. 20, 2023]
+- Added Minimap & Stamina bar
+
+
+<h1>Previous Changes</h1>
+
 [Nov. 19, 2023]
 - Added Characters & Terrain (On Development)
 - Animations Introduced
@@ -16,8 +22,6 @@
 - On Cursor toggled, the camera movement is disabled
 - Changes to Sprint, Running and Walking Speed
 - Removed Dashing Ability
-
-<h1>Previous Changes</h1>
 
 [Nov. 18, 2023]
 - Removed the player collider (Doesn't need this)
