@@ -12,6 +12,7 @@
 [Nov. 20, 2023]
 - Added Minimap & Stamina bar
 - Added Dynamic color bases on current stamina
+- Added player navigation icon & custom minimap icon
 
 
 <h1>Previous Changes</h1>
