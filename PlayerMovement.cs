@@ -1,11 +1,14 @@
 using Cinemachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -13,9 +16,12 @@ public class PlayerMovement : MonoBehaviour
 
     #region Variables: Character Speed & Stamina
     [SerializeField] 
-    private float charSpeed = 3.2f;
+    private float charSpeed = 2f;
     [SerializeField]
     public float maxStamina = 100f;
+    [SerializeField]
+    public Slider staminaSlider;
+
     #endregion
 
     #region Variables: Camera Motions
@@ -32,17 +38,22 @@ public class PlayerMovement : MonoBehaviour
     private bool cameraEnabled = true;
     #endregion
 
-    #region Variables: Walking, Running, Sprinting & Jumping
-    public int isWalking = 1;
+    #region Variables: Walking, Running, Sprinting, Jumping & Idle
+    [SerializeField]
     public bool isSprinting;
+    [SerializeField]
     public bool isJumping;
     [SerializeField]
+    private bool isWalking;
+    [SerializeField]
     private bool isRunning = true;
+    private string moveStatus = "";
     #endregion
 
     #region Variables: Stamina Depletion & Regeneration
     public float currentStamina;
-    public float staminaRegen = 12f;
+    public float runningstamina = 9f;
+    public float walkingstamina = 10f;
     public float staminaDeplete = 15f;
     #endregion
 
@@ -69,13 +80,16 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     public float dashSpeed = 8.2f; // Dash Speed
     private float cooldownTimer = 0.0f;
-    private bool isDashing = false;
     #endregion
 
     #region Variables: Animation
     private Animator animator;
+    private bool isMovingPlayer;
     #endregion
 
+    #region Character Hitting
+    private bool isHitting;
+    #endregion
 
     private void Start()
     {
@@ -116,16 +130,81 @@ public class PlayerMovement : MonoBehaviour
             Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
             // This will move the character
             charControl.Move(newDirection.normalized * charSpeed * Time.deltaTime);
-            animator.SetBool("isWalking_", true);
+            isMovingPlayer = true;
         }
         else
         {
-            animator.SetBool("isWalking_", false);
+            isMovingPlayer = false;
         }
-
+        PlayerMovements();
         UnhideCursor();
+
     }
 
+    void GravityAndJump()
+    {
+        if (charControl.isGrounded && verticalSpeed < 0.0f)
+        {
+            verticalSpeed = -1.0f;
+        }
+        else
+        {
+            verticalSpeed -= gravity * Time.deltaTime;
+        }
+
+        // Make the Player Jump
+        if (Input.GetButtonDown("Jump") && !isJumping && isMovingPlayer == true)
+        {
+            isJumping = true;
+            verticalSpeed = jumpSpeed;
+        }
+
+        Vector3 moveDirection = new Vector3(0, verticalSpeed, 0);
+        charControl.Move(moveDirection * Time.deltaTime);
+
+        // Reset the jump flag after the character is grounded again
+        if (charControl.isGrounded)
+        {
+            isJumping = false;
+        }
+    }
+
+    void PlayerMovements()
+    {
+        // This section is the walking
+        if (isWalking == true && isMovingPlayer == true)
+        {
+            // Walk to true
+            animator.SetBool("isWalking", true);
+        }
+        else
+        {
+            // Walk to false
+            animator.SetBool("isWalking", false);
+        }
+
+        // Running Section
+        if (isRunning == true && isMovingPlayer == true)
+        {
+            // Running to true
+            animator.SetBool("isRunning", true);
+        }
+        else
+        {
+            // Running to true
+            animator.SetBool("isRunning", false);
+        }
+
+        // Walk to Sprint
+        if(isSprinting == true && isMovingPlayer == true)
+        {
+            animator.SetBool("isSprinting", true);
+        }
+        else
+        {
+            animator.SetBool("isSprinting", false);
+        }
+    }
     void UnhideCursor()
     {
         // Show or Hide cursor on Keypress and KeyRelease
@@ -163,34 +242,6 @@ public class PlayerMovement : MonoBehaviour
         return cameraEnabled ? Input.GetAxis(axisName) : 0f;
     }
 
-    void GravityAndJump()
-    {
-        if (charControl.isGrounded && verticalSpeed < 0.0f)
-        {
-            verticalSpeed = -1.0f;
-        }
-        else
-        {
-            verticalSpeed -= gravity * Time.deltaTime;
-        }
-
-        // Make the Player Jump
-        if (Input.GetButtonDown("Jump") && !isJumping)
-        {
-            isJumping = true;
-            verticalSpeed = jumpSpeed;
-        }
-
-        Vector3 moveDirection = new Vector3(0, verticalSpeed, 0);
-        charControl.Move(moveDirection * Time.deltaTime);
-
-        // Reset the jump flag after the character is grounded again
-        if (charControl.isGrounded)
-        {
-            isJumping = false;
-        }
-    }
-
     void RunningToggle()
     {
         // Running and Walking key toggle
@@ -199,16 +250,20 @@ public class PlayerMovement : MonoBehaviour
             if (isRunning == false)
             {
                 isRunning = true;
+                isWalking = false;
                 return;
             }
             else if (isRunning == true)
             {
                 isRunning = false;
+                isWalking = true;
                 return;
             }
-
         }
     }
+
+    public Color fullStaminaColor = Color.green; // Color for high stamina
+    public Color lowStaminaColor = Color.red; // Color for low stamina
 
     /*
      * Sprinting & Stamina Physics
@@ -216,34 +271,62 @@ public class PlayerMovement : MonoBehaviour
 
     void SprintingStatus()
     {
+        staminaSlider.value = currentStamina;
+
+        float normalizedStamina = currentStamina / maxStamina;
+        Color lerpedColor = Color.Lerp(lowStaminaColor, fullStaminaColor, normalizedStamina);
+
+        // Apply the color to the slider's fill area
+        staminaSlider.fillRect.GetComponent<Image>().color = lerpedColor;
 
         // Stamina regeneration over time when not performing actions or if the stamina reaches zero
-        if (!isSprinting && currentStamina < maxStamina)
+        if (!isSprinting && isRunning == true && currentStamina < maxStamina)
         {
-            currentStamina = Mathf.Min(maxStamina, currentStamina + staminaRegen * Time.deltaTime);
+            currentStamina = Mathf.Min(maxStamina, currentStamina + runningstamina * Time.deltaTime);
+        }
+        else if (!isSprinting && isWalking == true && currentStamina < maxStamina)
+        {
+            currentStamina = Mathf.Min(maxStamina, currentStamina + walkingstamina * Time.deltaTime);
         }
 
         // Simulating a player action that consumes stamina (e.g., sprinting)
         if (Input.GetKeyDown(KeyCode.LeftShift) && currentStamina > 0 && cooldownTimer <= 0.0f)
         {
             isSprinting = true;
-            //// Checks if the player is on the ground
-            //if(charControl.isGrounded)
-            //{
-            //    // Starts the dash if its on the ground
-            //    isDashing = true;
-            //    cooldownTimer = dashCooldown;
-            //    StartCoroutine(Dash());
-            //}
+            if (isWalking == true)
+            {
+                moveStatus = "wasWalking";
+            }
+            else if (isRunning == true)
+            {
+                moveStatus = "wasRunning";
+            }
+            Task.Delay(TimeSpan.FromSeconds(0.30));
+            isWalking = false;
+            isRunning = false;
         }
 
         if (Input.GetKeyUp(KeyCode.LeftShift) || currentStamina <= 0)
         {
             isSprinting = false;
+            Task.Delay(TimeSpan.FromSeconds(0.30));
+            if (moveStatus == "wasWalking")
+            {
+                isWalking = true;
+                return;
+            }
+            else if (moveStatus == "wasRunning")
+            {
+                isRunning = true;
+            }
         }
 
+        /*
+         * Sprint Section
+         */
+
         // This reduces the stamina
-        if (isSprinting)
+        if (isSprinting && isMovingPlayer == true)
         {
             currentStamina -= staminaDeplete * Time.deltaTime;
         }
@@ -252,7 +335,7 @@ public class PlayerMovement : MonoBehaviour
         if (isSprinting == true)
         {
             // Set the character speed to the sprinting speed
-            charSpeed = 6.2f;
+            charSpeed = 6.8f;
         }
         else if (isSprinting == false && isRunning == true)
         {
@@ -262,7 +345,7 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             // Set the character speed to the walking speed after sprinting
-            charSpeed = 3.2f;
+            charSpeed = 2.2f;
         }
 
         // Cooldown for the dash
@@ -271,18 +354,4 @@ public class PlayerMovement : MonoBehaviour
             cooldownTimer -= Time.deltaTime;
         }
     }
-    //private System.Collections.IEnumerator Dash()
-    //{
-    //    // Starts the dash time upon key press
-    //    float startTime = Time.time;
-    //    Vector3 dashDirection = transform.forward; // Change to your desired direction
-
-    //    while (Time.time < startTime + dashDuration)
-    //    {
-    //        // Starts the dash movement
-    //        charControl.Move(dashDirection * dashSpeed * Time.deltaTime);
-    //        yield return null;
-    //    }
-    //    isDashing = false;
-    //}
 }

@@ -9,13 +9,13 @@ public class CameraZoom : MonoBehaviour
     // Reference of the freelook camera that the player / Character is using
     public CinemachineFreeLook freeLookCamera;
     [SerializeField]
-    public float zoomSpeed = 7.0f;
+    public float zoomSpeed = 4.0f;
     [SerializeField]
-    public float minRadius = 1.5f;
+    public float minRadius = 1.9f;
     [SerializeField]
-    public float maxRadius = 10.0f;
+    public float maxRadius = 7f;
     [SerializeField]
-    public float zoomSmooth = 5.0f;
+    public float zoomSmooth = 2.5f;
     public float currentRadius = 5.6f;
     public float targetRadius = 5.6f;
     #endregion
