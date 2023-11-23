@@ -11,6 +11,7 @@
 
 [Nov. 20, 2023]
 - Added Minimap & Stamina bar
+- Added Dynamic color bases on current stamina
 
 
 <h1>Previous Changes</h1>
