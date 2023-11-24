@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
 
     #region Variables: Character Speed & Stamina
     [SerializeField] 
-    private float charSpeed = 2f;
+    private float charSpeed = 1f;
     [SerializeField]
     public float maxStamina = 100f;
     [SerializeField]
@@ -52,9 +52,10 @@ public class PlayerMovement : MonoBehaviour
 
     #region Variables: Stamina Depletion & Regeneration
     public float currentStamina;
-    public float runningstamina = 9f;
-    public float walkingstamina = 10f;
+    public float runningstamina = 7f;
+    public float walkingstamina = 12f;
     public float staminaDeplete = 15f;
+    public bool staminaReachedZero;
     #endregion
 
     #region Variables: Gravity Physics
@@ -68,7 +69,7 @@ public class PlayerMovement : MonoBehaviour
 
     #region Value: Ground Distance & Mask
     [SerializeField]
-    public float groundDistance = 0.2f;
+    public float groundDistance = 0.1f;
     public LayerMask groundMask;
     #endregion
 
@@ -153,7 +154,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Make the Player Jump
-        if (Input.GetButtonDown("Jump") && !isJumping && isMovingPlayer == true)
+        if (Input.GetButtonDown("Jump") && !isJumping) // Player can now jump even without moving
         {
             isJumping = true;
             verticalSpeed = jumpSpeed;
@@ -169,6 +170,8 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
+    // Player Animation 
     void PlayerMovements()
     {
         // This section is the walking
@@ -256,7 +259,7 @@ public class PlayerMovement : MonoBehaviour
             else if (isRunning == true)
             {
                 isRunning = false;
-                isWalking = true;
+                isWalking = true; 
                 return;
             }
         }
@@ -271,44 +274,44 @@ public class PlayerMovement : MonoBehaviour
 
     void SprintingStatus()
     {
+        /*
+         * Stamina Regeneration
+         * Regeneration are different base on if the player is running or walking
+         * if the player is walking stamina regenerates faster
+         * if the player is running stamina regenerates a bit slower
+         */
+
+        if (!isSprinting && isWalking && currentStamina < maxStamina)
+        {
+            currentStamina = Mathf.Min(maxStamina, currentStamina + walkingstamina * Time.deltaTime);
+        }
+        else if (!isSprinting && isRunning && currentStamina < maxStamina)
+        {
+            currentStamina = Mathf.Min(maxStamina, currentStamina + runningstamina * Time.deltaTime);
+        }
+
+        // Set the value of the slider to the current stamina
         staminaSlider.value = currentStamina;
 
+        // Smooth color change from green to red
         float normalizedStamina = currentStamina / maxStamina;
         Color lerpedColor = Color.Lerp(lowStaminaColor, fullStaminaColor, normalizedStamina);
 
         // Apply the color to the slider's fill area
         staminaSlider.fillRect.GetComponent<Image>().color = lerpedColor;
 
-        // Stamina regeneration over time when not performing actions or if the stamina reaches zero
-        if (!isSprinting && isRunning == true && currentStamina < maxStamina)
-        {
-            currentStamina = Mathf.Min(maxStamina, currentStamina + runningstamina * Time.deltaTime);
-        }
-        else if (!isSprinting && isWalking == true && currentStamina < maxStamina)
-        {
-            currentStamina = Mathf.Min(maxStamina, currentStamina + walkingstamina * Time.deltaTime);
-        }
+        /*
+         * Statement 1
+         * If the player is holding the sprint while moving, set the value of isSprinting to true
+         * if the player is holding the sprint while not moving, reset it to false
+         */
 
-        // Simulating a player action that consumes stamina (e.g., sprinting)
-        if (Input.GetKeyDown(KeyCode.LeftShift) && currentStamina > 0 && cooldownTimer <= 0.0f)
-        {
-            isSprinting = true;
-            if (isWalking == true)
-            {
-                moveStatus = "wasWalking";
-            }
-            else if (isRunning == true)
-            {
-                moveStatus = "wasRunning";
-            }
-            Task.Delay(TimeSpan.FromSeconds(0.30));
-            isWalking = false;
-            isRunning = false;
-        }
+        // Get the Keyup for the lshift
 
         if (Input.GetKeyUp(KeyCode.LeftShift) || currentStamina <= 0)
         {
             isSprinting = false;
+            staminaReachedZero = true;
             Task.Delay(TimeSpan.FromSeconds(0.30));
             if (moveStatus == "wasWalking")
             {
@@ -318,40 +321,67 @@ public class PlayerMovement : MonoBehaviour
             else if (moveStatus == "wasRunning")
             {
                 isRunning = true;
+                return;
+            }
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && !staminaReachedZero)
+        {
+            if (!isMovingPlayer)
+            {
+                isSprinting = false;
+                Task.Delay(TimeSpan.FromSeconds(0.30));
+                if (moveStatus == "wasWalking")
+                {
+                    isWalking = true;
+                    return;
+                }
+                else if (moveStatus == "wasRunning")
+                {
+                    isRunning = true;
+                    return;
+                }
+            }
+            else if (isMovingPlayer && currentStamina > 0)
+            {
+                isSprinting = true;
+                charSpeed = 6.2f;
+                if (isWalking == true)
+                {
+                    moveStatus = "wasWalking";
+                }
+                else if (isRunning == true)
+                {
+                    moveStatus = "wasRunning";
+                }
+                Task.Delay(TimeSpan.FromSeconds(0.30));
+                isWalking = false;
+                isRunning = false;
             }
         }
 
         /*
-         * Sprint Section
+         * Change Character Speed Section
          */
 
-        // This reduces the stamina
-        if (isSprinting && isMovingPlayer == true)
+        if (isRunning == true)
         {
-            currentStamina -= staminaDeplete * Time.deltaTime;
-        }
-
-        // This increases the character speed
-        if (isSprinting == true)
-        {
-            // Set the character speed to the sprinting speed
-            charSpeed = 6.8f;
-        }
-        else if (isSprinting == false && isRunning == true)
-        {
-            // Set the character speed to the running speed after sprinting
             charSpeed = 4.2f;
         }
-        else
+        else if (isWalking == true)
         {
-            // Set the character speed to the walking speed after sprinting
-            charSpeed = 2.2f;
+            charSpeed = 1f;
         }
 
-        // Cooldown for the dash
-        if (cooldownTimer > 0.0f)
+        if (currentStamina > 30)
         {
-            cooldownTimer -= Time.deltaTime;
+            staminaReachedZero = false;
+        }
+
+        // This Section Depletes the player's Stamina
+        if (isSprinting == true && isMovingPlayer == true)
+        {
+            currentStamina -= staminaDeplete * Time.deltaTime;
         }
     }
 }
