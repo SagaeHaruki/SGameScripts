@@ -9,14 +9,20 @@
 
 <h1>Current Changes</h1>
 
-[Nov. 20, 2023]
+[Nov. 25, 2023]
+- Player Control files, some animations controls are fixed
+- Changed character speed (Sprint, Run, Walk)
+- Jump Animation Added
+- Dampening of camera movement
+
+<h1>Previous Changes</h1>
+
+[Nov. 24, 2023]
 - Fixed where the character doesn't regen stamina, (This happens when the player is not moving but holding the sprint key).
 - Fix Camera Sensitivity, (On full screen, the sensitivity is different from when it is on a small window).
 - The Character can now jump even when not moving, (This was disabled by me).
 
-<h1>Previous Changes</h1>
-
-[Nov. 20, 2023]
+[Nov. 23, 2023]
 - Added Minimap & Stamina bar.
 - Added Dynamic color bases on current stamina.
 - Added player navigation icon, camera direction icon, and custom minimap icon.
