@@ -56,7 +56,7 @@ public class PlayerControls : MonoBehaviour
 
     #region Variables: Gravity Physics
     [SerializeField]
-    public float jumpSpeed = 5.0f;
+    public float jumpSpeed = 5.4f;
     [SerializeField]
     public float gravity = 20.0f;
     [SerializeField]
@@ -99,18 +99,6 @@ public class PlayerControls : MonoBehaviour
         // Lock the cursor to the center of the screen
         Cursor.lockState = CursorLockMode.Locked;
     }
-    public void AdjustCameraDamping()
-    {
-        CinemachineOrbitalTransposer[] transposers = freelookCam.GetComponentsInChildren<CinemachineOrbitalTransposer>();
-
-        // Loop through each transposer (representing each rig: TopRig, MiddleRig, BottomRig)
-        foreach (CinemachineOrbitalTransposer transposer in transposers)
-        {
-            // Adjust damping for each axis
-            transposer.m_XDamping = 5.0f; // Adjust X-axis damping
-            transposer.m_YDamping = 5.0f; // Adjust Y-axis damping
-        }
-    }
 
     /*
      * Main Movement Section
@@ -122,10 +110,10 @@ public class PlayerControls : MonoBehaviour
         RunningToggle();
 
         /*
-         * Keyboard inputs (wasd or arrows)
+         * Keyboard inputs (wasd)
          */
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
+        float horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
+        float vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
 
         // Get the direction based on the movement, always normalize movement
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
@@ -171,12 +159,17 @@ public class PlayerControls : MonoBehaviour
         }
 
         // Make the Player Jump
-        if (Input.GetButtonDown("Jump")) // Player can now jump even without moving
+        if (Input.GetButtonDown("Jump") && !isJumping) // Player can now jump even without moving
         {
+            Task.Delay(TimeSpan.FromSeconds(1.2));
             isJumping = true;
-            animator.SetBool("isJumping", true);
             verticalSpeed = jumpSpeed;
+            if (!isMovingPlayer)
+            {
+                animator.SetBool("isHopping", true);
+            }
         }
+
 
         Vector3 moveDirection = new Vector3(0, verticalSpeed, 0);
         charControl.Move(moveDirection * Time.deltaTime);
@@ -185,7 +178,7 @@ public class PlayerControls : MonoBehaviour
         if (charControl.isGrounded)
         {
             isJumping = false;
-            animator.SetBool("isJumping", false);
+            animator.SetBool("isHopping", false);
         }
     }
 
@@ -238,13 +231,13 @@ public class PlayerControls : MonoBehaviour
         // Running and Walking key toggle
         if (Input.GetKeyDown(KeyCode.LeftControl) && !isJumping)
         {
-            if (isRunning == false)
+            if (!isRunning)
             {
                 isRunning = true;
                 isWalking = false;
                 return;
             }
-            else if (isRunning == true)
+            else if (isRunning)
             {
                 isRunning = false;
                 isWalking = true;
@@ -303,7 +296,7 @@ public class PlayerControls : MonoBehaviour
             else if (isMovingPlayer && (currentStamina > 0 && !isJumping))
             {
                 isSprinting = true;
-                charSpeed = 5f;
+                charSpeed = 9f;
             }
         }
 
@@ -311,11 +304,11 @@ public class PlayerControls : MonoBehaviour
          * Change Character Speed Section
          */
 
-        if (isRunning == true && !isSprinting)
+        if (isRunning && !isSprinting)
         {
-            charSpeed = 4f;
+            charSpeed = 6f;
         }
-        else if (isWalking == true && !isSprinting)
+        else if (isWalking && !isSprinting)
         {
             charSpeed = 1f;
         }
@@ -326,7 +319,11 @@ public class PlayerControls : MonoBehaviour
         }
 
         // This Section Depletes the player's Stamina
-        if (isSprinting == true && isMovingPlayer == true)
+        if (isSprinting && isMovingPlayer && !isJumping)
+        {
+            currentStamina -= 10 * Time.deltaTime;
+        }
+        else if (isSprinting && isMovingPlayer)
         {
             currentStamina -= staminaDeplete * Time.deltaTime;
         }
@@ -342,7 +339,6 @@ public class PlayerControls : MonoBehaviour
         bool runSprint = animator.GetBool("isSprinting");
         bool walkJumped = animator.GetBool("isJumping");
         bool walkSprint = animator.GetBool("isSprinting");
-
         /*
          * Running Animation
          */
@@ -365,6 +361,7 @@ public class PlayerControls : MonoBehaviour
         }
         else
         {
+            Task.Delay(TimeSpan.FromSeconds(1.2));
             animator.SetBool("isWalking", false);
         }
         /*
@@ -376,6 +373,7 @@ public class PlayerControls : MonoBehaviour
         }
         else if (runJumped && (!isMovingPlayer || !isJumping))
         {
+            Task.Delay(TimeSpan.FromSeconds(1.2));
             animator.SetBool("isJumping", false);
         }
 
@@ -385,6 +383,7 @@ public class PlayerControls : MonoBehaviour
         }
         else if (runSprint && (!isMovingPlayer || !isSprinting))
         {
+            Task.Delay(TimeSpan.FromSeconds(1.2));
             animator.SetBool("isSprinting", false);
         }
 
@@ -394,6 +393,7 @@ public class PlayerControls : MonoBehaviour
         }
         else if (walkJumped && (!isMovingPlayer || !isJumping))
         {
+            Task.Delay(TimeSpan.FromSeconds(1.2));
             animator.SetBool("isJumping", false);
         }
 
@@ -403,6 +403,7 @@ public class PlayerControls : MonoBehaviour
         }
         else if (walkSprint && (!isMovingPlayer || !isSprinting))
         {
+            Task.Delay(TimeSpan.FromSeconds(1.2));
             animator.SetBool("isSprinting", false);
         }
     }
