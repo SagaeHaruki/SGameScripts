@@ -10,12 +10,16 @@
 <h1>Current Changes</h1>
 
 [Nov. 25, 2023]
+- Creating a different methods on controlling player
+- Using RigidBody to control instead of Character control, for more realisting physics
+
+<h1>Previous Changes</h1>
+
+[Nov. 25, 2023]
 - Player Control files, some animations controls are fixed
 - Changed character speed (Sprint, Run, Walk)
 - Jump Animation Added
 - Dampening of camera movement
-
-<h1>Previous Changes</h1>
 
 [Nov. 24, 2023]
 - Fixed where the character doesn't regen stamina, (This happens when the player is not moving but holding the sprint key).
