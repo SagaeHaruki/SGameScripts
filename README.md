@@ -9,11 +9,15 @@
 
 <h1>Current Changes</h1>
 
+[Nov. 30, 2023]
+- V3 of the Scripts now available
+- Switched back to Character Controler instead of rigidboy (i have my own reasons lol)
+
+<h1>Previous Changes</h1>
+
 [Nov. 26, 2023]
 - Creating a different methods on controlling player
 - Using RigidBody to control instead of Character control, for more realisting physics
-
-<h1>Previous Changes</h1>
 
 [Nov. 25, 2023]
 - Player Control files, some animations controls are fixed
