@@ -9,7 +9,7 @@
 
 <h1>Current Changes</h1>
 
-[Nov. 25, 2023]
+[Nov. 26, 2023]
 - Creating a different methods on controlling player
 - Using RigidBody to control instead of Character control, for more realisting physics
 
