@@ -11,7 +11,7 @@
 
 [Dec. 1, 2023]
 - Tring to fix some animation problems for the game
-  
+- Trying to fix a bunny hop movement
 
 <h1>Previous Changes</h1>
 
