@@ -26,7 +26,9 @@ public class PlayerMovements : MonoBehaviour
     [SerializeField]
     private float charSpeed = 1f;
     [SerializeField]
-    public float jumpSpeed = 6.2f;
+    public float jumpSpeed = 7.5f;
+    [SerializeField]
+    public float hopSpeed = 6.2f;
     [SerializeField]
     public float gravity = 20.0f;
     [SerializeField]
@@ -47,6 +49,16 @@ public class PlayerMovements : MonoBehaviour
     private bool isJumping;
     [SerializeField]
     private bool isHopping;
+    [SerializeField]
+    private bool ignoreGravity;
+    #endregion
+
+    #region Jump Motion
+    private float jumpTimer = 0f;
+    public float jumpCooldown = 1f;
+    public float forwardForce = 4.8f; // Best forward motion
+    public float duration = 1f; // Best Duration for the smoothest motion
+    private float jumpStartTime;
     #endregion
 
     #region Value: Ground Distance & Mask
@@ -63,8 +75,8 @@ public class PlayerMovements : MonoBehaviour
 
     private Animator animator;
 
-    private float jumpTimer = 0f;
-    public float jumpCooldown = 1f;
+    [Range (0, 1f)]
+    public float DistanceToGround;
 
     private void Start()
     {
@@ -91,9 +103,29 @@ public class PlayerMovements : MonoBehaviour
         // Direction Movement
         if (direction.magnitude >= 0.1f)
         {
-            if (!isHopping)
+            if (isJumping && isRunningMoving)
             {
-                // Calculate the direction of the player
+                // This gives the jumping motion a duration to make it smoother
+                float elapsedTime = Time.time - jumpStartTime;
+                if (elapsedTime < duration)
+                {
+                    // Calculate the direction for the combined forward and upward motion
+                    Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * jumpSpeed;
+                    // Execute the motion
+                    charControl.Move(moveDirection * Time.deltaTime);
+                }
+                else
+                {
+                    isJumping = false;
+                }
+            }
+
+            // Disables the movement during the jump
+            // This is to prevent any changes of direction 
+            // This is the cause of a bunny hop
+            if (!isHopping && !isJumping)
+            {
+            // Calculate the direction of the player
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
             // This will smoothen the rotation of the angle (More math)
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
@@ -133,14 +165,17 @@ public class PlayerMovements : MonoBehaviour
         // Make the Player Jump
         if (Input.GetButtonDown("Jump") && !isJumping && jumpTimer <= 0) // Player can now jump even without moving
         {
-            isJumping = true;
-            verticalSpeed = jumpSpeed;
-            if (isWalking)
+            if (isWalking || !isMoving)
             {
+                verticalSpeed = hopSpeed;
                 isHopping = true;
             }
+
+            isJumping = true;
             jumpTimer = jumpCooldown;
+            jumpStartTime = Time.time;
         }
+
 
         // Running Toggle
         if (Input.GetKeyDown(KeyCode.LeftControl) && !isJumping)
@@ -220,17 +255,30 @@ public class PlayerMovements : MonoBehaviour
 
     private void GravityPhysics()
     {
-        if (charControl.isGrounded && verticalSpeed < 0.0f)
+        if (ignoreGravity)
         {
-            verticalSpeed = (-1.0f);
+            charControl.Move(Vector3.zero); // Reset any existing velocity
+            charControl.detectCollisions = false;
         }
         else
         {
-            verticalSpeed -= gravity * Time.deltaTime;
-        }
+            if (charControl.isGrounded && verticalSpeed < 0.0f)
+            {
+                verticalSpeed = (-1.0f);
+            }
+            else
+            {
+                verticalSpeed -= gravity * Time.deltaTime;
+            }
 
-        Vector3 moveDirection = new Vector3(0, verticalSpeed, 0);
-        charControl.Move(moveDirection * Time.deltaTime);
+            Vector3 moveDirection = new Vector3(0, verticalSpeed, 0);
+            charControl.Move(moveDirection * Time.deltaTime);
+        }
+    }
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        
     }
 
     void FixedUpdate()
