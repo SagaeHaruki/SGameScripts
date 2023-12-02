@@ -9,11 +9,15 @@
 
 <h1>Current Changes</h1>
 
+[Dec. 1, 2023]
+- Tring to fix some animation problems for the game
+  
+
+<h1>Previous Changes</h1>
+
 [Nov. 30, 2023]
 - V3 of the Scripts now available
 - Switched back to Character Controler instead of rigidboy (i have my own reasons lol)
-
-<h1>Previous Changes</h1>
 
 [Nov. 26, 2023]
 - Creating a different methods on controlling player
