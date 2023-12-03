@@ -73,10 +73,7 @@ public class PlayerMovements : MonoBehaviour
     float smoothingVelocity;
     #endregion
 
-    private Animator animator;
-
-    [Range (0, 1f)]
-    public float DistanceToGround;
+    protected Animator animator;
 
     private void Start()
     {
@@ -100,26 +97,22 @@ public class PlayerMovements : MonoBehaviour
         // Get the direction based on the movement, always normalize movement
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
+        if (isJumping && isRunning && !isHopping && !isWalking)
+        {
+            // This gives the jumping motion a duration to make it smoother
+            float elapsedTime = Time.time - jumpStartTime;
+            if (elapsedTime < duration)
+            {
+                // Calculate the direction for the combined forward and upward motion
+                Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * jumpSpeed;
+                // Execute the motion
+                charControl.Move(moveDirection * Time.deltaTime);
+            }
+        }
+
         // Direction Movement
         if (direction.magnitude >= 0.1f)
         {
-            if (isJumping && isRunningMoving)
-            {
-                // This gives the jumping motion a duration to make it smoother
-                float elapsedTime = Time.time - jumpStartTime;
-                if (elapsedTime < duration)
-                {
-                    // Calculate the direction for the combined forward and upward motion
-                    Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * jumpSpeed;
-                    // Execute the motion
-                    charControl.Move(moveDirection * Time.deltaTime);
-                }
-                else
-                {
-                    isJumping = false;
-                }
-            }
-
             // Disables the movement during the jump
             // This is to prevent any changes of direction 
             // This is the cause of a bunny hop
@@ -136,14 +129,77 @@ public class PlayerMovements : MonoBehaviour
             Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
             // This will move the character
             charControl.Move(newDirection.normalized * charSpeed * Time.deltaTime);
-            }
+
             isMoving = true;
+            }
         }
         else
         {
             isMoving = false;
         }
     }
+
+    [Range(0, 1f)]
+    public float DistanceToGround;
+
+    public LayerMask layermask;
+    public float minHeight = 0.5f; // Minimum height adjustment
+    public float maxHeight = 2.0f; // Maximum height adjustment
+    public float heightAdjustSpeed = 0.1f; // Adjustment speed
+
+    void OnAnimatorIK(int layerIndex)
+    {
+        if (animator)
+        {
+            animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1f);
+            animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 1f);
+            animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1f);
+            animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, 1f);
+            RaycastHit hit;
+            Ray ray = new Ray(animator.GetIKPosition(AvatarIKGoal.LeftFoot) + Vector3.up, Vector3.down);
+            if (Physics.Raycast(ray, out hit, DistanceToGround + 1f, layermask))
+            {
+                if (charControl.isGrounded)
+                {
+                    Vector3 footPos = hit.point;
+                    footPos.y += DistanceToGround;
+                    animator.SetIKPosition(AvatarIKGoal.LeftFoot, footPos);
+                    animator.SetIKRotation(AvatarIKGoal.LeftFoot, Quaternion.LookRotation(transform.forward, hit.normal));
+                    print("Left Foot" + footPos);
+                }
+            }
+
+            ray = new Ray(animator.GetIKPosition(AvatarIKGoal.RightFoot) + Vector3.up, Vector3.down);
+            if (Physics.Raycast(ray, out hit, DistanceToGround + 1f, layermask))
+            {
+                if (charControl.isGrounded)
+                {
+                    Vector3 footPos = hit.point;
+                    footPos.y += DistanceToGround;
+                    animator.SetIKPosition(AvatarIKGoal.RightFoot, footPos);
+                    animator.SetIKRotation(AvatarIKGoal.RightFoot, Quaternion.LookRotation(transform.forward, hit.normal));
+                    print("Right Foot" + footPos);
+                }
+            }
+        }
+    }
+
+    void CalculateDistanceAndAdjustPosition(AvatarIKGoal footGoal, Ray ray, RaycastHit hit)
+{
+    if (charControl.isGrounded)
+    {
+        Vector3 footPos = hit.point;
+        float distanceToGround = hit.distance;
+
+        // Calculate the distance from the foot to the ground
+        Debug.Log("Distance from " + footGoal.ToString() + " to ground: " + distanceToGround);
+
+        footPos.y += DistanceToGround;
+        animator.SetIKPosition(footGoal, footPos);
+        animator.SetIKRotation(footGoal, Quaternion.LookRotation(transform.forward, hit.normal));
+        print(footPos);
+    }
+}
 
     private void CheckKeyPressed()
     {
@@ -274,11 +330,6 @@ public class PlayerMovements : MonoBehaviour
             Vector3 moveDirection = new Vector3(0, verticalSpeed, 0);
             charControl.Move(moveDirection * Time.deltaTime);
         }
-    }
-
-    private void OnAnimatorIK(int layerIndex)
-    {
-        
     }
 
     void FixedUpdate()
