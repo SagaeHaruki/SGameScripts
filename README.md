@@ -9,11 +9,16 @@
 
 <h1>Current Changes</h1>
 
+[Dec. 3, 2023]
+- Fixed Bunny Hop
+- Added jump motion (stops the player movement)
+- Trying to use IK (Inverse Kinematics)
+
+<h1>Previous Changes</h1>
+
 [Dec. 1, 2023]
 - Tring to fix some animation problems for the game
 - Trying to fix a bunny hop movement
-
-<h1>Previous Changes</h1>
 
 [Nov. 30, 2023]
 - V3 of the Scripts now available
