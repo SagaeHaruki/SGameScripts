@@ -13,6 +13,7 @@
 - Fixed Bunny Hop
 - Added jump motion (stops the player movement)
 - Trying to use IK (Inverse Kinematics)
+- Functioning IK [GMT + 09:00] (Currenly not as accurate like the others)
 
 <h1>Previous Changes</h1>
 
