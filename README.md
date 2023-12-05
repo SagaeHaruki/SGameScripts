@@ -9,13 +9,18 @@
 
 <h1>Current Changes</h1>
 
+[Dec. 4, 2023]
+- Fully Functioning IK System (Reference from other projects)
+- Trying to fix character stairs climbing making the character glitching out
+- Animator controls fix
+
+<h1>Previous Changes</h1>
+
 [Dec. 3, 2023]
 - Fixed Bunny Hop
 - Added jump motion (stops the player movement)
 - Trying to use IK (Inverse Kinematics)
 - Functioning IK [GMT + 09:00] (Currenly not as accurate like the others)
-
-<h1>Previous Changes</h1>
 
 [Dec. 1, 2023]
 - Tring to fix some animation problems for the game
