@@ -46,7 +46,7 @@ public class PlayerMovements : MonoBehaviour
     [SerializeField]
     private bool isSprinting;
     [SerializeField]
-    private bool isJumping;
+    public bool isJumping;
     [SerializeField]
     private bool isHopping;
     [SerializeField]
@@ -138,68 +138,6 @@ public class PlayerMovements : MonoBehaviour
             isMoving = false;
         }
     }
-
-    [Range(0, 1f)]
-    public float DistanceToGround;
-
-    public LayerMask layermask;
-    public float minHeight = 0.5f; // Minimum height adjustment
-    public float maxHeight = 2.0f; // Maximum height adjustment
-    public float heightAdjustSpeed = 0.1f; // Adjustment speed
-
-    void OnAnimatorIK(int layerIndex)
-    {
-        if (animator)
-        {
-            animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1f);
-            animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 1f);
-            animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1f);
-            animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, 1f);
-            RaycastHit hit;
-            Ray ray = new Ray(animator.GetIKPosition(AvatarIKGoal.LeftFoot) + Vector3.up, Vector3.down);
-            if (Physics.Raycast(ray, out hit, DistanceToGround + 1f, layermask))
-            {
-                if (charControl.isGrounded)
-                {
-                    Vector3 footPos = hit.point;
-                    footPos.y += DistanceToGround;
-                    animator.SetIKPosition(AvatarIKGoal.LeftFoot, footPos);
-                    animator.SetIKRotation(AvatarIKGoal.LeftFoot, Quaternion.LookRotation(transform.forward, hit.normal));
-                    print("Left Foot" + footPos);
-                }
-            }
-
-            ray = new Ray(animator.GetIKPosition(AvatarIKGoal.RightFoot) + Vector3.up, Vector3.down);
-            if (Physics.Raycast(ray, out hit, DistanceToGround + 1f, layermask))
-            {
-                if (charControl.isGrounded)
-                {
-                    Vector3 footPos = hit.point;
-                    footPos.y += DistanceToGround;
-                    animator.SetIKPosition(AvatarIKGoal.RightFoot, footPos);
-                    animator.SetIKRotation(AvatarIKGoal.RightFoot, Quaternion.LookRotation(transform.forward, hit.normal));
-                    print("Right Foot" + footPos);
-                }
-            }
-        }
-    }
-
-    void CalculateDistanceAndAdjustPosition(AvatarIKGoal footGoal, Ray ray, RaycastHit hit)
-{
-    if (charControl.isGrounded)
-    {
-        Vector3 footPos = hit.point;
-        float distanceToGround = hit.distance;
-
-        // Calculate the distance from the foot to the ground
-        Debug.Log("Distance from " + footGoal.ToString() + " to ground: " + distanceToGround);
-
-        footPos.y += DistanceToGround;
-        animator.SetIKPosition(footGoal, footPos);
-        animator.SetIKRotation(footGoal, Quaternion.LookRotation(transform.forward, hit.normal));
-        print(footPos);
-    }
-}
 
     private void CheckKeyPressed()
     {
