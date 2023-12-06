@@ -371,6 +371,42 @@ public class PlayerMovements : MonoBehaviour
                 break;
         }
     }
+
+    public float stepHeight = 0.2f; // Adjust this value for the height of each stair step
+    public float stepDuration = 0.5f; // Adjust this value for the duration of the step movement
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Stairs")
+        {
+            // Get the normal of the collided stair surface
+            Vector3 stairNormal = collision.contacts[0].normal;
+
+            // Calculate the position adjustment based on the stair normal and step height
+            Vector3 stepUp = stairNormal * stepHeight; // Adjust stepHeight as needed
+
+            // Smoothly move the object upwards to match the stair height
+            StartCoroutine(SmoothStepUp(stepUp, stepDuration)); // Implement a coroutine for smooth movement
+        }
+    }
+
+    // Coroutine for smooth movement
+    IEnumerator SmoothStepUp(Vector3 stepUp, float duration)
+    {
+        float elapsedTime = 0f;
+        Vector3 initialPosition = transform.position;
+        Vector3 targetPosition = initialPosition + stepUp;
+
+        while (elapsedTime < duration)
+        {
+            transform.position = Vector3.Lerp(initialPosition, targetPosition, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = targetPosition; // Ensure reaching the exact position
+    }
+
 }
 
 public enum PlayerState
