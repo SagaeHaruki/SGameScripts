@@ -9,12 +9,17 @@
 
 <h1>Current Changes</h1>
 
+[Dec. 6, 2023]
+- Fine Tuning the IK System to make it smooth
+- Trying to fix the stairs issue (Bouncy character & Camera)
+- Might change from freelook camera to virtual camera
+
+<h1>Previous Changes</h1>
+
 [Dec. 4, 2023]
 - Fully Functioning IK System (Reference from other projects)
 - Trying to fix character stairs climbing making the character glitching out
 - Animator controls fix
-
-<h1>Previous Changes</h1>
 
 [Dec. 3, 2023]
 - Fixed Bunny Hop
