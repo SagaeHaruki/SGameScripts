@@ -12,7 +12,7 @@
 [Dec. 7, 2023]
 - Fix the Curves of the animator for the IK System (Not included in this package)
 - Adjust some part of the IK System
-
+- Added movement & jump detection for the ik system to stop the player from staying at the ground
 
 <h1>Previous Changes</h1>
 
