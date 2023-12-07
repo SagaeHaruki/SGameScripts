@@ -26,7 +26,7 @@ public class PlayerMovements : MonoBehaviour
     [SerializeField]
     private float charSpeed = 1f;
     [SerializeField]
-    public float jumpSpeed = 7.5f;
+    public float jumpSpeed = 8f;
     [SerializeField]
     public float hopSpeed = 6.2f;
     [SerializeField]
@@ -40,22 +40,22 @@ public class PlayerMovements : MonoBehaviour
     [SerializeField]
     private bool isRunning;
     [SerializeField]
-    private bool isWalkingMoving;
+    public bool isWalkingMoving;
     [SerializeField]
     private bool isRunningMoving;
     [SerializeField]
     private bool isSprinting;
     [SerializeField]
-    public bool isJumping;
+    private bool isJumping;
     [SerializeField]
-    private bool isHopping;
+    public bool isHopping;
     [SerializeField]
     private bool ignoreGravity;
     #endregion
 
     #region Jump Motion
     private float jumpTimer = 0f;
-    public float jumpCooldown = 1f;
+    public float jumpCooldown = 1.4f;
     public float forwardForce = 4.8f; // Best forward motion
     public float duration = 1f; // Best Duration for the smoothest motion
     private float jumpStartTime;
