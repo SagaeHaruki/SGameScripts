@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.XR;
 
 public class IKSystem : MonoBehaviour
@@ -13,6 +14,8 @@ public class IKSystem : MonoBehaviour
     private float lastPelvisPosY, lastLeftFotPosY, lastRightFotPosY;
     private bool isJumping;
     private bool isMoving;
+    private bool isFalling;
+    private bool startIK;
     private bool enableFeetIk = true;
     [SerializeField] private bool useProIK = false;
     private bool showDebugs = true;
@@ -22,10 +25,9 @@ public class IKSystem : MonoBehaviour
     [SerializeField] private float pelvisOffset = 0f;
     [SerializeField] private float pelvisUpDownSpeed = 0.3f;
     [SerializeField] private float feetIkPosSpeed = 0.1f;
-
+    [Range(-20, 10)] [SerializeField] public float fallingThreshold = -10f;
     public string leftFootAnim = "LeftFootCurve";
     public string rightFootAnim = "RightFootCurve";
-
 
     private void Start()
     {
@@ -35,9 +37,13 @@ public class IKSystem : MonoBehaviour
 
     private void Update()
     {
+        // GetFalling();
+        ChangeState();
+
         float horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
         float vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
+
         if (direction.magnitude >= 0.1f)
         {
             if (!isJumping)
@@ -50,10 +56,9 @@ public class IKSystem : MonoBehaviour
             isMoving = false;
         }
 
-        if (Input.GetButtonDown("Jump") && !isJumping) // Player can now jump even without moving
+        if (Input.GetButtonDown("Jump") && !isJumping)
         {
             isJumping = true;
-            print(isJumping);
         }
 
         if (charControl.isGrounded)
@@ -61,8 +66,22 @@ public class IKSystem : MonoBehaviour
             isJumping = false;
         }
 
-        ChangeState();
     }
+
+    //private void GetFalling()
+    //{
+    //    if (charControl.isGrounded)
+    //    {
+    //        isFalling = false;
+    //    }
+    //    else
+    //    {
+    //        if (charControl.velocity.y < fallingThreshold)
+    //        {
+    //            isFalling = true;
+    //        }
+    //    }
+    //}
 
     private void ChangeState()
     {

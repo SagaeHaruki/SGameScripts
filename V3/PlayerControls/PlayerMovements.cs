@@ -21,36 +21,22 @@ public class PlayerMovements : MonoBehaviour
     #endregion
 
     #region Character & rotation Speed & Gravity
-    [SerializeField]
-    private PlayerState currentState;
-    [SerializeField]
-    private float charSpeed = 1f;
-    [SerializeField]
-    public float jumpSpeed = 8f;
-    [SerializeField]
-    public float hopSpeed = 6.2f;
-    [SerializeField]
-    public float gravity = 20.0f;
-    [SerializeField]
-    private float verticalSpeed = 0.0f;
-    [SerializeField]
-    private bool isMoving;
-    [SerializeField]
-    private bool isWalking;
-    [SerializeField]
-    private bool isRunning;
-    [SerializeField]
-    public bool isWalkingMoving;
-    [SerializeField]
-    private bool isRunningMoving;
-    [SerializeField]
-    private bool isSprinting;
-    [SerializeField]
-    private bool isJumping;
-    [SerializeField]
-    public bool isHopping;
-    [SerializeField]
-    private bool ignoreGravity;
+    [SerializeField] private PlayerState currentState;
+    [SerializeField] private float charSpeed = 1f;
+    [SerializeField] public float jumpSpeed = 8f;
+    [SerializeField] public float hopSpeed = 6.2f;
+    [SerializeField] public float gravity = 20.0f;
+    [SerializeField] private float verticalSpeed = 0.0f;
+    [SerializeField] private bool isMoving;
+    [SerializeField] private bool isWalking;
+    [SerializeField] private bool isRunning;
+    [SerializeField] public bool isWalkingMoving;
+    [SerializeField] private bool isRunningMoving;
+    [SerializeField] private bool isSprinting;
+    [SerializeField] private bool isJumping;
+    [SerializeField] public bool isHopping;
+    [SerializeField] private bool ignoreGravity;
+    [SerializeField] private bool canMove;
     #endregion
 
     #region Jump Motion
@@ -62,8 +48,8 @@ public class PlayerMovements : MonoBehaviour
     #endregion
 
     #region Value: Ground Distance & Mask
-    [SerializeField]
-    public float groundDistance = 0.1f;
+    [SerializeField] public float groundDistance = 0.1f;
+    [Range(-20, 10)][SerializeField] public float fallingThreshold = -10f;
     public LayerMask groundMask;
     #endregion
 
@@ -75,11 +61,13 @@ public class PlayerMovements : MonoBehaviour
 
     protected Animator animator;
 
+
     private void Start()
     {
         charControl = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         isRunning = true;
+        canMove = true;
         // Hides the cursor
         Cursor.visible = false;
         // Lock the cursor to the center of the screen
@@ -91,53 +79,73 @@ public class PlayerMovements : MonoBehaviour
         GravityPhysics();
         ChangeState();
         CheckKeyPressed();
+        // GetFalling();
         float horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
         float vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
 
         // Get the direction based on the movement, always normalize movement
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
-        if (isJumping && isRunning && !isHopping && !isWalking)
+
+        if (canMove)
         {
-            // This gives the jumping motion a duration to make it smoother
-            float elapsedTime = Time.time - jumpStartTime;
-            if (elapsedTime < duration)
+            if (isJumping && isRunning && !isHopping && !isWalking)
             {
-                // Calculate the direction for the combined forward and upward motion
-                Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * jumpSpeed;
-                // Execute the motion
-                charControl.Move(moveDirection * Time.deltaTime);
+                // This gives the jumping motion a duration to make it smoother
+                float elapsedTime = Time.time - jumpStartTime;
+                if (elapsedTime < duration)
+                {
+                    // Calculate the direction for the combined forward and upward motion
+                    Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * jumpSpeed;
+                    // Execute the motion
+                    charControl.Move(moveDirection * Time.deltaTime);
+                }
             }
-        }
 
-        // Direction Movement
-        if (direction.magnitude >= 0.1f)
-        {
-            // Disables the movement during the jump
-            // This is to prevent any changes of direction 
-            // This is the cause of a bunny hop
-            if (!isHopping && !isJumping)
+            // Direction Movement
+            if (direction.magnitude >= 0.1f)
             {
-            // Calculate the direction of the player
-            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
-            // This will smoothen the rotation of the angle (More math)
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
-            // Rotates the player based on the direction
-            transform.rotation = Quaternion.Euler(0f, angle, 0f);
+                // Disables the movement during the jump
+                // This is to prevent any changes of direction 
+                // This is the cause of a bunny hop
+                if (!isHopping && !isJumping)
+                {
+                    // Calculate the direction of the player
+                    float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
+                    // This will smoothen the rotation of the angle (More math)
+                    float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
+                    // Rotates the player based on the direction
+                    transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-            // Direction base on the camera angle
-            Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-            // This will move the character
-            charControl.Move(newDirection.normalized * charSpeed * Time.deltaTime);
+                    // Direction base on the camera angle
+                    Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+                    // This will move the character
+                    charControl.Move(newDirection.normalized * charSpeed * Time.deltaTime);
 
-            isMoving = true;
+                    isMoving = true;
+                }
             }
-        }
-        else
-        {
-            isMoving = false;
+            else
+            {
+                isMoving = false;
+            }
         }
     }
+
+    //private void GetFalling()
+    //{
+    //    if (charControl.isGrounded)
+    //    {
+    //        canMove = true;
+    //    }
+    //    else
+    //    {
+    //        if (charControl.velocity.y < fallingThreshold)
+    //        {
+    //            canMove = false;
+    //        }
+    //    }
+    //}
 
     private void CheckKeyPressed()
     {
@@ -157,7 +165,7 @@ public class PlayerMovements : MonoBehaviour
         }
 
         // Make the Player Jump
-        if (Input.GetButtonDown("Jump") && !isJumping && jumpTimer <= 0) // Player can now jump even without moving
+        if (Input.GetButtonDown("Jump") && !isJumping && jumpTimer <= 0)
         {
             if (isWalking || !isMoving)
             {
@@ -256,14 +264,27 @@ public class PlayerMovements : MonoBehaviour
         }
         else
         {
-            if (charControl.isGrounded && verticalSpeed < 0.0f)
+            if (charControl.isGrounded && verticalSpeed < 0.0f && isMoving || charControl.isGrounded && verticalSpeed < 0.0f && !isMoving)
             {
-                verticalSpeed = (-1.0f);
+                verticalSpeed = -1.0f;
             }
             else
             {
                 verticalSpeed -= gravity * Time.deltaTime;
             }
+
+            //if (charControl.isGrounded && verticalSpeed < 0.0f && isMoving || charControl.isGrounded && verticalSpeed < 0.0f)
+            //{
+            //    verticalSpeed = -1.0f;
+            //}
+            //else if (isJumping)
+            //{
+            //    verticalSpeed -= gravity * Time.deltaTime;
+            //}
+            //else if (!isJumping)
+            //{
+            //    verticalSpeed -= gravity * Time.deltaTime;
+            //}
 
             Vector3 moveDirection = new Vector3(0, verticalSpeed, 0);
             charControl.Move(moveDirection * Time.deltaTime);
