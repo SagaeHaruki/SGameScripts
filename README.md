@@ -9,13 +9,18 @@
 
 <h1>Current Changes</h1>
 
+[Dec. 9, 2023]
+- Trying to fix a jumping issue (Has something to do with the Gravity)
+- Trying to create a new Gravity Logic
+- A V4 of a PlayerMovement script might happen
+
+<h1>Previous Changes</h1>
+
 [Dec. 7, 2023]
 - Fix the Curves of the animator for the IK System (Not included in this package)
 - Adjust some part of the IK System
 - Added movement & jump detection for the ik system to stop the player from staying at the ground
 - Added a system on when the player is moving, i changes the value of the height & ground detection for the raycast
-
-<h1>Previous Changes</h1>
 
 [Dec. 6, 2023]
 - Fine Tuning the IK System to make it smooth
