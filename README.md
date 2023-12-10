@@ -12,7 +12,8 @@
 [Dec. 10, 2023]
 > [Current Player Movement Script]
   - Some minor adjustment
-  - 
+  - Adjustment to the Character Control
+  - Character can step over small obstacles (no animations yet)
 
 > [New Player Movement Script]
   - Cleaner code
