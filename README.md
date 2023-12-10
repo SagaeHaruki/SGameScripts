@@ -9,12 +9,23 @@
 
 <h1>Current Changes</h1>
 
+[Dec. 10, 2023]
+> [Current Player Movement Script]
+  - Some minor adjustment
+  - 
+
+> [New Player Movement Script]
+  - Cleaner code
+  - Better Jumping System
+  - Better Gravity Physics
+
+
+<h1>Previous Changes</h1>
+
 [Dec. 9, 2023]
 - Trying to fix a jumping issue (Has something to do with the Gravity)
 - Trying to create a new Gravity Logic
 - A V4 of a PlayerMovement script might happen (Will be putted on the V3 Folder)
-
-<h1>Previous Changes</h1>
 
 [Dec. 7, 2023]
 - Fix the Curves of the animator for the IK System (Not included in this package)
