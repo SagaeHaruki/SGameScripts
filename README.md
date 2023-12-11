@@ -9,11 +9,10 @@
 
 <h1>Current Changes</h1>
 
-[Dec. 10, 2023]
+[Dec. 11, 2023]
 - Adjustments to the IK System.
 - Fix Pelvis height on the ik system (When going up or down a slope or stairs).
 - New Animation System
-
 
 <h1>Previous Changes</h1>
 
