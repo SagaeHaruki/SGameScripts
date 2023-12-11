@@ -10,6 +10,14 @@
 <h1>Current Changes</h1>
 
 [Dec. 10, 2023]
+- Adjustments to the IK System.
+- Fix Pelvis height on the ik system (When going up or down a slope or stairs).
+- New Animation System
+
+
+<h1>Previous Changes</h1>
+
+[Dec. 10, 2023]
 > [Current Player Movement Script]
   - Some minor adjustment
   - Adjustment to the Character Control
@@ -19,9 +27,6 @@
   - Cleaner code
   - Better Jumping System
   - Better Gravity Physics
-
-
-<h1>Previous Changes</h1>
 
 [Dec. 9, 2023]
 - Trying to fix a jumping issue (Has something to do with the Gravity)
