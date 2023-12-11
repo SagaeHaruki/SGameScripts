@@ -26,6 +26,7 @@ public class IKSystem : MonoBehaviour
     [SerializeField] private float pelvisUpDownSpeed = 0.3f;
     [SerializeField] private float feetIkPosSpeed = 0.1f;
     [Range(-20, 10)] [SerializeField] public float fallingThreshold = -10f;
+    [Range(0, 2)][SerializeField] public float pelvisLowerOffset = 0.05f;
     public string leftFootAnim = "LeftFootCurve";
     public string rightFootAnim = "RightFootCurve";
 
@@ -67,21 +68,6 @@ public class IKSystem : MonoBehaviour
         }
 
     }
-
-    //private void GetFalling()
-    //{
-    //    if (charControl.isGrounded)
-    //    {
-    //        isFalling = false;
-    //    }
-    //    else
-    //    {
-    //        if (charControl.velocity.y < fallingThreshold)
-    //        {
-    //            isFalling = true;
-    //        }
-    //    }
-    //}
 
     private void ChangeState()
     {
@@ -197,10 +183,32 @@ public class IKSystem : MonoBehaviour
             float leftOffsetPos = leftFootIkPos.y - transform.position.y;
             float rightOffsetPos = rightFootIkPos.y - transform.position.y;
             float totalOffsetVal = (leftOffsetPos < rightOffsetPos) ? leftOffsetPos : rightOffsetPos;
-            Vector3 newPelvisPos = animator.bodyPosition + Vector3.up * totalOffsetVal;
-            newPelvisPos.y = Mathf.Lerp(lastPelvisPosY, newPelvisPos.y, pelvisUpDownSpeed);
-            animator.bodyPosition = newPelvisPos;
-            lastPelvisPosY = animator.bodyPosition.y;
+
+            if (!isMoving)
+            {
+                Vector3 newPelvisPos = animator.bodyPosition + Vector3.up * totalOffsetVal;
+                newPelvisPos.y = Mathf.Lerp(lastPelvisPosY, newPelvisPos.y, pelvisUpDownSpeed);
+                animator.bodyPosition = newPelvisPos;
+                lastPelvisPosY = animator.bodyPosition.y;
+            }
+            else
+            {
+                Vector3 upDirection = Vector3.up;
+                RaycastHit hit;
+
+                if (Physics.Raycast(transform.position, -Vector3.up, out hit))
+                {
+                    upDirection = hit.normal; // Get the surface normal where the character is standing
+                }
+
+                float slopeAngle = Vector3.Angle(Vector3.up, upDirection);
+                float pelvisOffset = Mathf.Tan(slopeAngle * Mathf.Deg2Rad) * totalOffsetVal - pelvisLowerOffset;
+
+                Vector3 newPelvisPos = animator.bodyPosition + Vector3.up * pelvisOffset;
+                newPelvisPos.y = Mathf.Lerp(lastPelvisPosY, newPelvisPos.y, pelvisUpDownSpeed);
+                animator.bodyPosition = newPelvisPos;
+                lastPelvisPosY = animator.bodyPosition.y;
+            }
         }
     }
 
@@ -231,7 +239,7 @@ public class IKSystem : MonoBehaviour
         if (!isJumping)
         { 
             feetPositions = animator.GetBoneTransform(foot).position;
-        feetPositions.y = transform.position.y + heightFromGround;
+            feetPositions.y = transform.position.y + heightFromGround;
         }
     }
     #endregion

@@ -2,6 +2,7 @@ using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.ProBuilder.Shapes;
 
 public class PlayerMovement3 : MonoBehaviour
 {
@@ -25,11 +26,14 @@ public class PlayerMovement3 : MonoBehaviour
     #endregion
 
     #region Booleans
-    private bool isMoving;
-    private bool isRunning;
-    private bool isSprinting;
-    private bool isWalking;
+    [SerializeField] private bool isMoving;
+    [SerializeField] private bool isRunning;
+    [SerializeField] private bool isSprinting;
+    [SerializeField] private bool isWalking;
     [SerializeField] private bool isJumping;
+    [SerializeField] private bool isGrounded;
+    [SerializeField] private string lastMovement;
+
     #endregion
 
     #region Variables: Camera Motions
@@ -39,19 +43,18 @@ public class PlayerMovement3 : MonoBehaviour
     #endregion
 
     #region Jump Motion
-    private float jumpTimer = 0f;
-    public float jumpCooldown = 1.4f;
     public float forwardForce = 4.8f;
     public float duration = 1f;
     private float jumpStartTime;
     #endregion
 
+
     private void Start()
     {
         charControl = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-
-
+        isRunning = true;
+        lastMovement = "isRunning";
         // Hides & lock the cursor
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
@@ -62,10 +65,12 @@ public class PlayerMovement3 : MonoBehaviour
     {
         horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
         vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
-        
         MovePlayer();
+        MoveSpeedChanger();
         GravityPhysics();
+        KeyPressHandler();
     }
+
 
     private void MovePlayer()
     {
@@ -98,10 +103,66 @@ public class PlayerMovement3 : MonoBehaviour
                 // This moves the player based on its forward direction
                 Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
                 charControl.Move(newDirection.normalized * playerSpeed * Time.deltaTime);
+
+                isMoving = true;
             }
         }
-
+        else
+        {
+            isMoving = false;
+        }
     }
+
+    private void MoveSpeedChanger()
+    {
+        if (isMoving)
+        {
+            if(lastMovement == "isWalking")
+            {
+                isWalking = true;
+                playerSpeed = 1f;
+                animator.SetBool("isWalking", true);
+                animator.SetBool("isRunning", false);
+            }
+            if (lastMovement == "isRunning")
+            {
+                isRunning = true;
+                playerSpeed = 4.2f;
+                animator.SetBool("isWalking", false);
+                animator.SetBool("isRunning", true);
+            }
+        }
+        else if(!isMoving)
+        {
+            isWalking = false;
+            isRunning = false;
+            animator.SetBool("isWalking", false);
+            animator.SetBool("isRunning", false);
+        }
+    }
+
+    private void KeyPressHandler()
+    {
+        if(Input.GetKeyDown(KeyCode.LeftControl) && !isJumping)   
+        {
+            if (lastMovement == "isWalking")
+            {
+                lastMovement = "isRunning";
+                isRunning = true;
+                isWalking = false;
+                return;
+            }
+
+            if (lastMovement == "isRunning")
+            {
+                lastMovement = "isWalking";
+                isRunning = false;
+                isWalking = true;            
+                return;
+            }
+        }
+    }
+
 
     private void GravityPhysics()
     {
@@ -111,15 +172,15 @@ public class PlayerMovement3 : MonoBehaviour
 
             if (Input.GetButtonDown("Jump"))
             {
+                isGrounded = false;
                 isJumping = true;
                 Velocity.y = jumpForce;
-
-                jumpTimer = jumpCooldown;
                 jumpStartTime = Time.time;
             }
             else
             {
                 isJumping = false;
+                isGrounded = true;
             }
         }
         else
