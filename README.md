@@ -13,7 +13,8 @@
 - Minor adjustments to ik system
 - Adding slope detections (for speed change)
 - Adjusting pelvis movement
-- Minor adjustments to the jumping method 
+- Minor adjustments to the jumping method
+- Preventing movements when jumping (including the booleans)
 - Re-Coding some parts of the old player movement system
 
 <h1>Previous Changes</h1>
