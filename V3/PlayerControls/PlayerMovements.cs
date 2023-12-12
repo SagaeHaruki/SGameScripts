@@ -59,11 +59,17 @@ public class PlayerMovements : MonoBehaviour
     float smoothingVelocity;
     #endregion
 
+    private Vector3 previousPosition;
+    private bool isMovingUp;
+    private bool isMovingDown;
+
     protected Animator animator;
 
 
     private void Start()
     {
+        previousPosition = transform.position;
+        print(previousPosition);
         charControl = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         isRunning = true;
@@ -76,6 +82,7 @@ public class PlayerMovements : MonoBehaviour
 
     void Update()
     {
+        getUpDown();
         GravityPhysics();
         ChangeState();
         CheckKeyPressed();
@@ -130,6 +137,43 @@ public class PlayerMovements : MonoBehaviour
                 isMoving = false;
             }
         }
+    }
+
+    private void getUpDown()
+    {
+        Vector3 currentPosition = transform.position;
+
+        RaycastHit hit;
+        Vector3 downDirection = -transform.up;
+
+        if (Physics.Raycast(currentPosition, downDirection, out hit))
+        {
+            Vector3 surfaceNormal = hit.normal;
+
+            // Compare surface normals to detect movement direction
+            float dotProduct = Vector3.Dot(surfaceNormal, Vector3.up);
+
+            if (dotProduct > 0.8f) // Adjust this threshold as needed
+            {
+                isMovingUp = true;
+                isMovingDown = false;
+                Debug.Log("Moving Up");
+                // Your code for handling upward movement
+            }
+            else if (dotProduct < -0.8f) // Adjust this threshold as needed
+            {
+                isMovingDown = true;
+                isMovingUp = false;
+                Debug.Log("Moving Down");
+                // Your code for handling downward movement
+            }
+            else
+            {
+                isMovingUp = isMovingDown = false;
+            }
+        }
+
+        previousPosition = currentPosition;
     }
 
     //private void GetFalling()

@@ -23,12 +23,14 @@ public class IKSystem : MonoBehaviour
     [SerializeField] private float raycastDownDistance = 0.45f;
     [SerializeField] private LayerMask LayerMask;
     [SerializeField] private float pelvisOffset = 0f;
-    [SerializeField] private float pelvisUpDownSpeed = 0.3f;
-    [SerializeField] private float feetIkPosSpeed = 0.1f;
-    [Range(-20, 10)] [SerializeField] public float fallingThreshold = -10f;
+    [SerializeField] private float pelvisUpDownSpeed = 0.8f;
+    [SerializeField] private float feetIkPosSpeed = 0.12f;
     [Range(0, 2)][SerializeField] public float pelvisLowerOffset = 0.05f;
     public string leftFootAnim = "LeftFootCurve";
     public string rightFootAnim = "RightFootCurve";
+
+    public float maxRayDistance = 1.0f;
+    float slopeAngle;
 
     private void Start()
     {
@@ -38,9 +40,8 @@ public class IKSystem : MonoBehaviour
 
     private void Update()
     {
-        // GetFalling();
         ChangeState();
-
+        GetSlopeAngle();
         float horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
         float vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
@@ -66,31 +67,29 @@ public class IKSystem : MonoBehaviour
         {
             isJumping = false;
         }
-
     }
+
+    private void GetSlopeAngle()
+    {
+        if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, maxRayDistance, LayerMask))
+        {
+            Vector3 groundNormal = hit.normal;
+            slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
+
+        }
+    }
+
 
     private void ChangeState()
     {
-        if (isMoving && !isJumping)
+        if (isMoving)
         {
-            heightFromGround = 0.25f;
-            raycastDownDistance = 0.15f;
-        }
-        else
-        {
-            heightFromGround = 0.45f;
-            raycastDownDistance = 0.45f;
-        }
-
-        if (isJumping)
-        {
-            heightFromGround = 0.09f;
-            raycastDownDistance = 0.09f;
-        }
-        else
-        {
-            heightFromGround = 0.45f;
-            raycastDownDistance = 0.45f;
+            //print(slopeAngle);
+            //if (slopeAngle >= 35 && slopeAngle <= 40)
+            //{
+            //    heightFromGround = 0.60f;
+            //    raycastDownDistance = 0.60f;
+            //}
         }
     }
 
