@@ -9,12 +9,17 @@
 
 <h1>Current Changes</h1>
 
+[Dec. 12, 2023]
+- Minor adjustments to ik system
+- Adding slope detections (for speed change)
+- Adjusting pelvis movement
+
+<h1>Previous Changes</h1>
+
 [Dec. 11, 2023]
 - Adjustments to the IK System.
 - Fix Pelvis height on the ik system (When going up or down a slope or stairs).
 - New Animation System
-
-<h1>Previous Changes</h1>
 
 [Dec. 10, 2023]
 > [Current Player Movement Script]
