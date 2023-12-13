@@ -84,12 +84,36 @@ public class IKSystem : MonoBehaviour
     {
         if (isMoving)
         {
-            //print(slopeAngle);
-            //if (slopeAngle >= 35 && slopeAngle <= 40)
-            //{
-            //    heightFromGround = 0.60f;
-            //    raycastDownDistance = 0.60f;
-            //}
+            if (slopeAngle >= 40 && slopeAngle <= 45)
+            {
+                heightFromGround = 0.67f;
+                raycastDownDistance = 0.67f;
+            }
+            else if (slopeAngle >= 35 && slopeAngle <= 40)
+            {
+                heightFromGround = 0.62f;
+                raycastDownDistance = 0.62f;
+            }
+            else if (slopeAngle >= 30 && slopeAngle <= 35)
+            {
+                heightFromGround = 0.57f;
+                raycastDownDistance = 0.57f;
+            }
+            else if (slopeAngle >= 25 && slopeAngle <= 30)
+            {
+                heightFromGround = 0.52f;
+                raycastDownDistance = 0.52f;
+            }
+            else if (slopeAngle >= 20 && slopeAngle <= 25)
+            {
+                heightFromGround = 0.47f;
+                raycastDownDistance = 0.47f;
+            }
+            else
+            {
+                heightFromGround = 0.45f;
+                raycastDownDistance = 0.45f;
+            }
         }
     }
 

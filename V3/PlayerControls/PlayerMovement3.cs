@@ -11,6 +11,7 @@ public class PlayerMovement3 : MonoBehaviour
     [SerializeField] private CinemachineFreeLook freelookCam;
     [SerializeField] private Transform CameraAngle;
     [SerializeField] private Animator animator;
+    [SerializeField] private LayerMask LayerMask;
     #endregion
 
     #region Physics values
@@ -50,11 +51,16 @@ public class PlayerMovement3 : MonoBehaviour
 
 
     private Vector3 previousPosition;
+    private float previousYPosition;
     private bool isMovingUp;
     private bool isMovingDown;
 
+    public float maxRayDistance = 1.0f;
+    float slopeAngle;
+
     private void Start()
     {
+        previousYPosition = transform.position.y;
         charControl = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         isRunning = true;
@@ -73,6 +79,7 @@ public class PlayerMovement3 : MonoBehaviour
         MoveSpeedChanger();
         GravityPhysics();
         KeyPressHandler();
+        GetSlopeAngle();
         //getUpPos();
     }
 
@@ -154,21 +161,123 @@ public class PlayerMovement3 : MonoBehaviour
         }
     }
 
+    private void GetSlopeAngle()
+    {
+        if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, maxRayDistance, LayerMask))
+        {
+            Vector3 groundNormal = hit.normal;
+            slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
+        }
+    }
+
     private void MoveSpeedChanger()
     {
         if (isMoving)
         {
-            if(lastMovement == "isWalking")
+            if (lastMovement == "isWalking")
             {
                 isWalking = true;
-                playerSpeed = 1f;
+                float currentYPosition = transform.position.y;
+
+                if (slopeAngle >= 35 && slopeAngle <= 45)
+                {
+                    if (currentYPosition > previousYPosition)
+                    {
+                        // Player is going up
+                        playerSpeed = 0.7f;
+
+                    }
+                    else if (currentYPosition < previousYPosition)
+                    {
+                        // Going down
+                        playerSpeed = 1.6f;
+                    }
+                    else
+                    {
+                        return;
+                    }
+
+                    previousYPosition = currentYPosition;
+                }
+                else if (slopeAngle >= 25 && slopeAngle <= 35)
+                {
+                    if (currentYPosition > previousYPosition)
+                    {
+                        // Player is going up
+                        playerSpeed = 0.9f;
+
+                    }
+                    else if (currentYPosition < previousYPosition)
+                    {
+                        // Going down
+                        playerSpeed = 1.4f;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    previousYPosition = currentYPosition;
+                }
+                else
+                {
+                    playerSpeed = 1.3f;
+                }
+
                 animator.SetBool("isWalking", true);
                 animator.SetBool("isRunning", false);
             }
+
+
             if (lastMovement == "isRunning")
             {
+                print(slopeAngle);
                 isRunning = true;
-                playerSpeed = 4.2f;
+
+                float currentYPosition = transform.position.y;
+
+                if (slopeAngle >= 35 && slopeAngle <= 45)
+                {
+                    if (currentYPosition > previousYPosition)
+                    {
+                        // Player is going up
+                        playerSpeed = 2.4f;
+
+                    }
+                    else if (currentYPosition < previousYPosition)
+                    {
+                        // Going down
+                        playerSpeed = 3.8f;
+                    }
+                    else
+                    {
+                        return;
+                    }
+
+                    previousYPosition = currentYPosition;
+                }
+                else if (slopeAngle >= 25 && slopeAngle <= 35)
+                {
+                    if (currentYPosition > previousYPosition)
+                    {
+                        // Player is going up
+                        playerSpeed = 2.7f;
+
+                    }
+                    else if (currentYPosition < previousYPosition)
+                    {
+                        // Going down
+                        playerSpeed = 3.5f;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    previousYPosition = currentYPosition;
+                }
+                else
+                {
+                    playerSpeed = 4.1f;
+                }
                 animator.SetBool("isWalking", false);
                 animator.SetBool("isRunning", true);
             }
