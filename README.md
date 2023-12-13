@@ -9,6 +9,10 @@
 
 <h1>Future plans:</h1>
 
+- Attacking System
+- Improved Animation System
+- Code Cleanup
+
 <h1>Current Changes:</h1>
 
 [Dec. 12, 2023]
