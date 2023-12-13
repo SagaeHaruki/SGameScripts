@@ -13,6 +13,7 @@
 - Improved Animation System
 - Code Cleanup
 - Sounds based on the terrain
+- Day/Night Cycle
 - NPC Movement & Interaction
 
 <h1>Current Changes:</h1>
