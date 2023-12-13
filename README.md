@@ -12,6 +12,7 @@
 - Attacking System
 - Improved Animation System
 - Code Cleanup
+- NPC Movement & Interaction
 
 <h1>Current Changes:</h1>
 
