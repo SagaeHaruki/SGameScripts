@@ -12,6 +12,7 @@
 - Attacking System
 - Improved Animation System
 - Code Cleanup
+- Sounds based on the terrain
 - NPC Movement & Interaction
 
 <h1>Current Changes:</h1>
