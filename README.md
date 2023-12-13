@@ -10,14 +10,19 @@
 <h1>Current Changes</h1>
 
 [Dec. 12, 2023]
+- Speed change based on the angle of the slope and if the player is moving up or down
+- Adjustments to speed
+- IK System Pelvis movement adjustment based on the angle of the foot
+
+<h1>Previous Changes</h1>
+
+[Dec. 12, 2023]
 - Minor adjustments to ik system
 - Adding slope detections (for speed change)
 - Adjusting pelvis movement
 - Minor adjustments to the jumping method
 - Preventing movements when jumping (including the booleans)
 - Re-Coding some parts of the old player movement system
-
-<h1>Previous Changes</h1>
 
 [Dec. 11, 2023]
 - Adjustments to the IK System.
