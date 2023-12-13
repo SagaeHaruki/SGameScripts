@@ -7,7 +7,9 @@
 - Note that sometime in the future this will be sorted base on the how many objects will be added to the game.
 - If Some Objects can be added here then i will also publicly allow anyone to use it.
 
-<h1>Current Changes</h1>
+<h1>Future plans:</h1>
+
+<h1>Current Changes:</h1>
 
 [Dec. 12, 2023]
 - Speed change based on the angle of the slope and if the player is moving up or down
