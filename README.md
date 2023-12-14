@@ -21,6 +21,7 @@
 [Dec. 14, 2023]
 - Speed Adjustments
 - Jumping Height Adjustments
+- Fall Distance Detection
 
 <h1>Previous Changes</h1>
 
