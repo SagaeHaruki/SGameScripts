@@ -22,6 +22,7 @@
 - Speed Adjustments
 - Jumping Height Adjustments
 - Fall Distance Detection
+- Jump height change based on the movement (because of the animation)
 
 <h1>Previous Changes</h1>
 
