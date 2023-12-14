@@ -18,7 +18,7 @@
 
 <h1>Current Changes:</h1>
 
-[Dec. 12, 2023]
+[Dec. 13, 2023]
 - Speed change based on the angle of the slope and if the player is moving up or down
 - Adjustments to speed
 - IK System Pelvis movement adjustment based on the angle of the foot
