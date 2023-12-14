@@ -15,6 +15,7 @@
 - Sounds based on the terrain
 - Day/Night Cycle
 - NPC Movement & Interaction
+- Might USE Procedural animation on some movements
 
 <h1>Current Changes:</h1>
 
