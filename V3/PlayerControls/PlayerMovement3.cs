@@ -2,6 +2,7 @@ using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.ProBuilder.Shapes;
 
 public class PlayerMovement3 : MonoBehaviour
@@ -45,7 +46,7 @@ public class PlayerMovement3 : MonoBehaviour
 
     #region Jump Motion
     public float forwardForce = 4.8f;
-    public float duration = 1f;
+    public float duration = 1.2f;
     private float jumpStartTime;
     #endregion
 
@@ -57,6 +58,8 @@ public class PlayerMovement3 : MonoBehaviour
 
     public float maxRayDistance = 1.0f;
     float slopeAngle;
+
+    public float minHeightDifference = 3.0f;
 
     private void Start()
     {
@@ -80,84 +83,63 @@ public class PlayerMovement3 : MonoBehaviour
         GravityPhysics();
         KeyPressHandler();
         GetSlopeAngle();
-        //getUpPos();
+        HighandLowJump();
+        ChangeJumpHeight();
+        FallDistance();
     }
 
-    private void getUpPos()
+    private void FallDistance()
     {
-        Vector3 currentPosition = transform.position;
-
-        RaycastHit hit;
-        Vector3 downDirection = -transform.up;
-        if (Physics.Raycast(currentPosition, downDirection, out hit))
+        if (!charControl.isGrounded)
         {
-            Vector3 surfaceNormal = hit.normal;
+            RaycastHit hit;
+            Ray ray = new Ray(transform.position, Vector3.down);
 
-            // Compare surface normals to detect movement direction
-            float dotProduct = Vector3.Dot(surfaceNormal, Vector3.up);
-
-            if (dotProduct > 0.8f) // Adjust this threshold as needed
+            // Cast a ray downward to detect the ground
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, LayerMask))
             {
-                isMovingUp = true;
-                isMovingDown = false;
-                Debug.Log("Moving Up");
-                // Your code for handling upward movement
-            }
-            else if (dotProduct < -0.8f) // Adjust this threshold as needed
-            {
-                isMovingDown = true;
-                isMovingUp = false;
-                Debug.Log("Moving Down");
-                // Your code for handling downward movement
-            }
-            else
-            {
-                isMovingUp = isMovingDown = false;
+                float currentHeight = hit.distance;
+                // Check if the character fell from a certain height
+                if (currentHeight >= minHeightDifference)
+                {
+                    print("isFalling");
+                    Vector3 moveDirection = transform.forward * 1.2f + Vector3.up * Velocity.y;
+                    // Execute the motion
+                    charControl.Move(moveDirection * Time.deltaTime);
+                    isGrounded = false;
+                }
             }
         }
-
-        previousPosition = currentPosition;
     }
-
 
     private void MovePlayer()
     {
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
-        if (isJumping)
+        if (isGrounded)
         {
-            // This gives the jumping motion a duration to make it smoother
-            float elapsedTime = Time.time - jumpStartTime;
-            if (elapsedTime < duration)
+            if (direction.magnitude >= 0.1f)
             {
-                // Calculate the direction for the combined forward and upward motion
-                Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * Velocity.y;
-                // Execute the motion
-                charControl.Move(moveDirection * Time.deltaTime);
-            }
-        }
+                if (!isJumping)
+                {
+                    /*
+                     * This Section will calculate the direction of the player, then smoothens it rotation based on the calulated direction
+                     */
+                    float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
+                    float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
+                    transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-        if (direction.magnitude >= 0.1f)
-        {
-            if (!isJumping)
+                    // This moves the player based on its forward direction
+                    Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+                    charControl.Move(newDirection.normalized * playerSpeed * Time.deltaTime);
+
+                    isMoving = true;
+                }
+            }
+            else
             {
-                /*
-                 * This Section will calculate the direction of the player, then smoothens it rotation based on the calulated direction
-                 */
-                float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
-                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
-                transform.rotation = Quaternion.Euler(0f, angle, 0f);
-
-                // This moves the player based on its forward direction
-                Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-                charControl.Move(newDirection.normalized * playerSpeed * Time.deltaTime);
-
-                isMoving = true;
+                isMoving = false;
             }
-        }
-        else
-        {
-            isMoving = false;
         }
     }
 
@@ -176,53 +158,8 @@ public class PlayerMovement3 : MonoBehaviour
         {
             if (lastMovement == "isWalking")
             {
-                isWalking = true;
-                float currentYPosition = transform.position.y;
-
-                if (slopeAngle >= 35 && slopeAngle <= 45)
-                {
-                    if (currentYPosition > previousYPosition)
-                    {
-                        // Player is going up
-                        playerSpeed = 0.7f;
-
-                    }
-                    else if (currentYPosition < previousYPosition)
-                    {
-                        // Going down
-                        playerSpeed = 1.6f;
-                    }
-                    else
-                    {
-                        return;
-                    }
-
-                    previousYPosition = currentYPosition;
-                }
-                else if (slopeAngle >= 25 && slopeAngle <= 35)
-                {
-                    if (currentYPosition > previousYPosition)
-                    {
-                        // Player is going up
-                        playerSpeed = 0.9f;
-
-                    }
-                    else if (currentYPosition < previousYPosition)
-                    {
-                        // Going down
-                        playerSpeed = 1.4f;
-                    }
-                    else
-                    {
-                        return;
-                    }
-                    previousYPosition = currentYPosition;
-                }
-                else
-                {
-                    playerSpeed = 1.3f;
-                }
-
+                isWalking = true;            
+                playerSpeed = 1.3f;
                 animator.SetBool("isWalking", true);
                 animator.SetBool("isRunning", false);
             }
@@ -240,13 +177,13 @@ public class PlayerMovement3 : MonoBehaviour
                     if (currentYPosition > previousYPosition)
                     {
                         // Player is going up
-                        playerSpeed = 2.4f;
+                        playerSpeed = 2.5f;
 
                     }
                     else if (currentYPosition < previousYPosition)
                     {
                         // Going down
-                        playerSpeed = 3.8f;
+                        playerSpeed = 3.7f;
                     }
                     else
                     {
@@ -260,7 +197,7 @@ public class PlayerMovement3 : MonoBehaviour
                     if (currentYPosition > previousYPosition)
                     {
                         // Player is going up
-                        playerSpeed = 2.7f;
+                        playerSpeed = 2.6f;
 
                     }
                     else if (currentYPosition < previousYPosition)
@@ -276,7 +213,7 @@ public class PlayerMovement3 : MonoBehaviour
                 }
                 else
                 {
-                    playerSpeed = 4.1f;
+                    playerSpeed = 3.9f;
                 }
                 animator.SetBool("isWalking", false);
                 animator.SetBool("isRunning", true);
@@ -313,12 +250,12 @@ public class PlayerMovement3 : MonoBehaviour
         }
     }
 
-
     private void GravityPhysics()
     {
         if (charControl.isGrounded)
         {
             Velocity.y = -1f;
+            animator.SetBool("isJumping", false);
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -339,5 +276,43 @@ public class PlayerMovement3 : MonoBehaviour
         }
 
         charControl.Move(Velocity * Time.deltaTime);
+    }
+
+    private void HighandLowJump()
+    {
+
+        if (isJumping && isWalking || isJumping && !isMoving)
+        {
+            animator.SetBool("isJumping", true);
+            float elapsedTime = Time.time - jumpStartTime;
+            if (elapsedTime < duration)
+            {
+            }
+        }
+        else if(isJumping && isRunning || isJumping && isSprinting)
+        {
+            animator.SetBool("isJumping", true);
+            // This gives the jumping motion a duration to make it smoother
+            float elapsedTime = Time.time - jumpStartTime;
+            if (elapsedTime < duration)
+            {
+                // Calculate the direction for the combined forward and upward motion
+                Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * Velocity.y;
+                // Execute the motion
+                charControl.Move(moveDirection * Time.deltaTime);
+            }
+        }
+    }
+
+    private void ChangeJumpHeight()
+    {
+        if (isRunning)
+        {
+            jumpForce = 4.4f;
+        }
+        else
+        {
+            jumpForce = 5.6f;
+        }
     }
 }
