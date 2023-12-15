@@ -144,6 +144,10 @@ public class PlayerMovement3 : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            animator.SetBool("isFalling", false);
+        }
     }
 
     private void MovePlayer()
@@ -186,7 +190,19 @@ public class PlayerMovement3 : MonoBehaviour
     {
         if (isMoving)
         {
-            if (lastMovement == "isWalking")
+            if (isSprinting)
+            {
+                playerSpeed = 7.2f;
+                animator.SetBool("isWalking", false);
+                animator.SetBool("isRunning", false);
+                animator.SetBool("isSprinting", true);
+            }
+            else
+            {
+                animator.SetBool("isSprinting", false);
+            }
+
+            if (lastMovement == "isWalking" && !isSprinting)
             {
                 isWalking = true;            
                 playerSpeed = 1.3f;
@@ -195,7 +211,7 @@ public class PlayerMovement3 : MonoBehaviour
             }
 
 
-            if (lastMovement == "isRunning")
+            if (lastMovement == "isRunning" && !isSprinting)
             {
                 isRunning = true;
 
@@ -254,6 +270,7 @@ public class PlayerMovement3 : MonoBehaviour
             isRunning = false;
             animator.SetBool("isWalking", false);
             animator.SetBool("isRunning", false);
+            animator.SetBool("isSprinting", false);
         }
     }
 
@@ -277,6 +294,22 @@ public class PlayerMovement3 : MonoBehaviour
                 return;
             }
         }
+
+        if (Input.GetKey(KeyCode.LeftShift) && !isJumping)
+        {
+            if (isMoving)
+            {
+                isSprinting = true;
+            }
+            else
+            {
+                isSprinting = false;
+            }
+        }
+        else
+        {
+            isSprinting = false;
+        }
     }
 
     private void GravityPhysics()
@@ -286,7 +319,7 @@ public class PlayerMovement3 : MonoBehaviour
             Velocity.y = -1f;
             animator.SetBool("isJumping", false);
             animator.SetBool("isFalling", false);
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Space) && !isJumping)
             {
                 isGrounded = false;
                 isJumping = true;
@@ -311,20 +344,13 @@ public class PlayerMovement3 : MonoBehaviour
 
         if (isJumping && isWalking || isJumping && !isMoving)
         {
-            jumpStartTime = Time.time;
             animator.SetBool("isJumping", true);
         }
-        else if(isJumping && isRunning || isJumping && isSprinting)
+        else if (isJumping && isRunning || isJumping && isSprinting)
         {
-            jumpStartTime = Time.time;
             animator.SetBool("isJumping", true);
-
-
-            // Calculate the direction for the combined forward and upward motion
             Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * Velocity.y;
-            // Execute the motion
             charControl.Move(moveDirection * Time.deltaTime);
-
         }
     }
 
