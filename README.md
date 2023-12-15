@@ -20,12 +20,18 @@
 <h1>Current Changes:</h1>
 
 [Dec. 14, 2023]
+- Gravity Adjustments
+- Jump Height Adjustments, (Gravity adjustments affected jump height)
+- Falling Character System
+- Wall Detection (Beta)
+
+<h1>Previous Changes</h1>
+
+[Dec. 14, 2023]
 - Speed Adjustments
 - Jumping Height Adjustments
 - Fall Distance Detection
 - Jump height change based on the movement (because of the animation)
-
-<h1>Previous Changes</h1>
 
 [Dec. 13, 2023]
 - Speed change based on the angle of the slope and if the player is moving up or down
