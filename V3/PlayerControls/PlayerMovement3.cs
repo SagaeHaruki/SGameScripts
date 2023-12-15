@@ -56,10 +56,17 @@ public class PlayerMovement3 : MonoBehaviour
     private bool isMovingUp;
     private bool isMovingDown;
 
+    // Slope
     public float maxRayDistance = 1.0f;
     float slopeAngle;
-
+    // Falling Distance
     public float minHeightDifference = 3.0f;
+
+
+    public Transform ChestOrigin; // The position from where you'll cast the ray
+    public Transform PelvisOrigin;
+    public float raycastDistance = 1.0f; // How far the ray will be cast
+
 
     private void Start()
     {
@@ -86,7 +93,30 @@ public class PlayerMovement3 : MonoBehaviour
         HighandLowJump();
         ChangeJumpHeight();
         FallDistance();
+        CheckForWalls();
     }
+
+    private void CheckForWalls()
+    {
+        Vector3 forwardDirection = transform.forward;
+
+        RaycastHit hit;
+
+        bool ChestHit = Physics.Raycast(ChestOrigin.position, forwardDirection, out hit, raycastDistance);
+        bool PelvisHit = Physics.Raycast(PelvisOrigin.position, forwardDirection, out hit, raycastDistance);
+
+        if (ChestHit && PelvisHit)
+        {
+            print("ChestHeight");
+            Vector3 targetPosition = new Vector3(transform.position.x, 2.7f, transform.position.z);
+            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * playerSpeed);
+        }
+        else if (PelvisHit && !ChestHit)
+        {
+            print("PelvisHeight");
+        }
+    }
+
 
     private void FallDistance()
     {
@@ -102,11 +132,15 @@ public class PlayerMovement3 : MonoBehaviour
                 // Check if the character fell from a certain height
                 if (currentHeight >= minHeightDifference)
                 {
-                    print("isFalling");
                     Vector3 moveDirection = transform.forward * 1.2f + Vector3.up * Velocity.y;
-                    // Execute the motion
                     charControl.Move(moveDirection * Time.deltaTime);
                     isGrounded = false;
+
+                    animator.SetBool("isJumping", false);
+                    animator.SetBool("isRunning", false);
+                    animator.SetBool("isWalking", false);
+                    animator.SetBool("isSprinting", false);
+                    animator.SetBool("isFalling", true);
                 }
             }
         }
@@ -115,31 +149,27 @@ public class PlayerMovement3 : MonoBehaviour
     private void MovePlayer()
     {
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
-
-        if (isGrounded)
+        if (direction.magnitude >= 0.1f)
         {
-            if (direction.magnitude >= 0.1f)
+            if (!isJumping)
             {
-                if (!isJumping)
-                {
-                    /*
-                     * This Section will calculate the direction of the player, then smoothens it rotation based on the calulated direction
-                     */
-                    float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
-                    float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
-                    transform.rotation = Quaternion.Euler(0f, angle, 0f);
+                /*
+                 * This Section will calculate the direction of the player, then smoothens it rotation based on the calulated direction
+                 */
+                float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
+                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
+                transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-                    // This moves the player based on its forward direction
-                    Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-                    charControl.Move(newDirection.normalized * playerSpeed * Time.deltaTime);
+                // This moves the player based on its forward direction
+                Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+                charControl.Move(newDirection.normalized * playerSpeed * Time.deltaTime);
 
-                    isMoving = true;
-                }
+                isMoving = true;
             }
-            else
-            {
-                isMoving = false;
-            }
+        }
+        else
+        {
+            isMoving = false;
         }
     }
 
@@ -167,7 +197,6 @@ public class PlayerMovement3 : MonoBehaviour
 
             if (lastMovement == "isRunning")
             {
-                print(slopeAngle);
                 isRunning = true;
 
                 float currentYPosition = transform.position.y;
@@ -256,13 +285,12 @@ public class PlayerMovement3 : MonoBehaviour
         {
             Velocity.y = -1f;
             animator.SetBool("isJumping", false);
-
-            if (Input.GetButtonDown("Jump"))
+            animator.SetBool("isFalling", false);
+            if (Input.GetKey(KeyCode.Space))
             {
                 isGrounded = false;
                 isJumping = true;
                 Velocity.y = jumpForce;
-                jumpStartTime = Time.time;
             }
             else
             {
@@ -283,24 +311,20 @@ public class PlayerMovement3 : MonoBehaviour
 
         if (isJumping && isWalking || isJumping && !isMoving)
         {
+            jumpStartTime = Time.time;
             animator.SetBool("isJumping", true);
-            float elapsedTime = Time.time - jumpStartTime;
-            if (elapsedTime < duration)
-            {
-            }
         }
         else if(isJumping && isRunning || isJumping && isSprinting)
         {
+            jumpStartTime = Time.time;
             animator.SetBool("isJumping", true);
-            // This gives the jumping motion a duration to make it smoother
-            float elapsedTime = Time.time - jumpStartTime;
-            if (elapsedTime < duration)
-            {
-                // Calculate the direction for the combined forward and upward motion
-                Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * Velocity.y;
-                // Execute the motion
-                charControl.Move(moveDirection * Time.deltaTime);
-            }
+
+
+            // Calculate the direction for the combined forward and upward motion
+            Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * Velocity.y;
+            // Execute the motion
+            charControl.Move(moveDirection * Time.deltaTime);
+
         }
     }
 

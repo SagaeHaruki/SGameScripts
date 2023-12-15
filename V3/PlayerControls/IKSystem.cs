@@ -109,6 +109,11 @@ public class IKSystem : MonoBehaviour
                 heightFromGround = 0.47f;
                 raycastDownDistance = 0.47f;
             }
+            else if(isJumping || !charControl.isGrounded)
+            {
+                heightFromGround = 0.0f;
+                raycastDownDistance = 0.0f;
+            }
             else
             {
                 heightFromGround = 0.45f;
