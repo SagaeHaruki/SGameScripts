@@ -20,7 +20,7 @@
 <h1>Current Changes:</h1>
 
 [Dec. 16, 2023]
-- 
+- Fix some part of the jumping system causing animation & movement bug
 
 <h1>Previous Changes</h1>
 
