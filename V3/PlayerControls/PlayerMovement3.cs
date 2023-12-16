@@ -33,6 +33,7 @@ public class PlayerMovement3 : MonoBehaviour
     [SerializeField] private bool isSprinting;
     [SerializeField] private bool isWalking;
     [SerializeField] private bool isJumping;
+    [SerializeField] private bool jump2;
     [SerializeField] private bool isGrounded;
     [SerializeField] private string lastMovement;
 
@@ -323,12 +324,21 @@ public class PlayerMovement3 : MonoBehaviour
             {
                 isGrounded = false;
                 isJumping = true;
+                if (isSprinting)
+                {
+                    jump2 = true;
+                }
+                else
+                {
+                    jump2 = false;
+                }
                 Velocity.y = jumpForce;
             }
             else
             {
                 isJumping = false;
                 isGrounded = true;
+                jump2 = false;
             }
         }
         else
@@ -341,28 +351,28 @@ public class PlayerMovement3 : MonoBehaviour
 
     private void HighandLowJump()
     {
-
-        if (isJumping && isWalking || isJumping && !isMoving)
-        {
-            animator.SetBool("isJumping", true);
-        }
-        else if (isJumping && isRunning || isJumping && isSprinting)
+        if (isJumping && isRunning || isJumping && jump2)
         {
             animator.SetBool("isJumping", true);
             Vector3 moveDirection = transform.forward * forwardForce + Vector3.up * Velocity.y;
             charControl.Move(moveDirection * Time.deltaTime);
         }
+        else if (isJumping && isWalking && !isSprinting || isJumping && !isMoving && !isSprinting)
+        {
+            animator.SetBool("isJumping", true);
+            print("jumped!");
+        }
     }
 
     private void ChangeJumpHeight()
     {
-        if (isRunning)
+        if (isRunning || isSprinting)
         {
-            jumpForce = 4.4f;
+            jumpForce = 3.4f;
         }
         else
         {
-            jumpForce = 5.6f;
+            jumpForce = 4.6f;
         }
     }
 }
