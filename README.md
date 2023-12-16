@@ -19,7 +19,7 @@
 
 <h1>Current Changes:</h1>
 
-[Dec. 14, 2023]
+[Dec. 15, 2023]
 - Gravity Adjustments
 - Jump Height Adjustments, (Gravity adjustments affected jump height)
 - Falling Character System
