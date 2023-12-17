@@ -19,11 +19,17 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 17, 2023]
+- Added a version 4 of the player movement script
+- New PlayerState System indicates if the player is Idling, Walking, Moving, Jumping, etc...
+- New Gravity System with the v4
+- New Jumping System with the v4
+
+<h1>Previous Changes</h1>
+
 [Dec. 16, 2023]
 - Fix some part of the jumping system causing animation & movement bug
 - Jump height adjustment (Current jump height is too high)
-
-<h1>Previous Changes</h1>
 
 [Dec. 15, 2023]
 - Gravity Adjustments
