@@ -24,6 +24,7 @@
 - New PlayerState System indicates if the player is Idling, Walking, Moving, Jumping, etc...
 - New Gravity System with the v4
 - New Jumping System with the v4
+- New Jump motion when moving on walking state (small jump forward instead of just upward only)
 
 <h1>Previous Changes</h1>
 
