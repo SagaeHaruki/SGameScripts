@@ -26,6 +26,7 @@
 - New Jumping System with the v4
 - New Slope Detection with the v4
 - New Jump motion when moving on walking state (small jump forward instead of just upward only)
+- Gravity Adjustments
 
 <h1>Previous Changes</h1>
 
