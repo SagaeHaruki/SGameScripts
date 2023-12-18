@@ -19,6 +19,13 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 18, 2023]
+- Fix a bug on which the player cannot jump when going down a slope
+- Jump Height adjustments
+- Rework on the new Jumping System
+
+<h1>Previous Changes</h1>
+
 [Dec. 17, 2023]
 - Added a version 4 of the player movement script
 - New PlayerState System indicates if the player is Idling, Walking, Moving, Jumping, etc...
@@ -27,8 +34,6 @@
 - New Slope Detection with the v4
 - New Jump motion when moving on walking state (small jump forward instead of just upward only)
 - Gravity Adjustments
-
-<h1>Previous Changes</h1>
 
 [Dec. 16, 2023]
 - Fix some part of the jumping system causing animation & movement bug
