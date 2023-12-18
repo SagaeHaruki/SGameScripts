@@ -17,7 +17,7 @@ public class PlaverMovement4 : MonoBehaviour
     [SerializeField] private float playerSpeed = 3.2f;
     [SerializeField] private float jumpForce;
     [SerializeField] private float Gravity = -9.81f;
-    [SerializeField] private float minHeightDifference = 2.5f;
+    [SerializeField] private float minHeightDifference = 2.8f;
     [SerializeField] private Vector3 Velocity;
     #endregion
 
@@ -30,7 +30,9 @@ public class PlaverMovement4 : MonoBehaviour
     private float runningForce = 4.6f;
     private float walkingForce = 2.6f;
     private float duration = 1.2f;
-    private float jumpStartTime;
+    private float jumpCooldown = 1.2f;
+    private float jumpTimer = 0f;
+    private bool canJump = true;
     #endregion
 
     #region Slope Detection
@@ -75,7 +77,6 @@ public class PlaverMovement4 : MonoBehaviour
         GetKeyPress();
         PhysicsApplication();
         FallDistance();
-        JumpHeightChanger();
         GetSlopeAngle();
         float horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
         float vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
@@ -83,17 +84,38 @@ public class PlaverMovement4 : MonoBehaviour
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
         if (direction.magnitude >= 0.1f)
         {
-            if (!isJumping)
+            if (!isJumping || isFalling)
             {
                 // This Section will calculate the direction of the player, then smoothens it rotation based on the calulated direction
                 float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
                 transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
+
                 // This moves the player based on its forward direction
                 Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
                 charControl.Move(newDirection.normalized * playerSpeed * Time.deltaTime);
                 isMoving = true;
+
+            }
+            else
+            {
+                if (isJumping && isRunning || isJumping && isSprinting)
+                {
+                    Vector3 moveDirection = transform.forward * runningForce + Vector3.up * Velocity.y;
+                    charControl.Move(moveDirection * Time.deltaTime);
+                    isMoving = false;
+                }
+                else if (isJumping && isWalking)
+                {
+                    Vector3 moveDirection = transform.forward * walkingForce + Vector3.up * Velocity.y;
+                    charControl.Move(moveDirection * Time.deltaTime);
+                    isMoving = false;
+                }
+                else
+                {
+
+                }
             }
         }
         else
@@ -182,43 +204,26 @@ public class PlaverMovement4 : MonoBehaviour
             isSprinting = false;
         }
 
-
-        if (charControl.isGrounded)
+        jumpTimer += Time.deltaTime;
+        if (!canJump)
         {
-            if (Input.GetKeyDown(KeyCode.Space) && !isJumping)
+            if (jumpTimer >= jumpCooldown)
             {
-                isJumping = true;
-                jumpForce = 6.5f;
+                jumpTimer = 0;
+                canJump = true;
             }
-            else
-            {
-                jumpForce = 0f;
-                isJumping = false;
-            }
+        }
+        if (canJump && Input.GetKeyDown(KeyCode.Space) && !isJumping)
+        {
+            isJumping = true;
+            jumpForce = 6.5f;
+        }
+        else if (!goingDown && charControl.isGrounded)
+        {
+            jumpForce = 0f;
+            isJumping = false;
         }
     }
-
-    private void JumpHeightChanger()
-    {
-        if (isMoving)
-        {
-            if (isJumping && isRunning || isJumping && isSprinting)
-            {
-                Vector3 moveDirection = transform.forward * runningForce + Vector3.up * Velocity.y;
-                charControl.Move(moveDirection * Time.deltaTime);
-            }
-            else if (isJumping && isWalking)
-            {
-                Vector3 moveDirection = transform.forward * walkingForce + Vector3.up * Velocity.y;
-                charControl.Move(moveDirection * Time.deltaTime);
-            }
-        }
-        else
-        {
-
-        }
-    }
-
 
     private void FallDistance()
     {
@@ -239,10 +244,6 @@ public class PlaverMovement4 : MonoBehaviour
                     isFalling = true;
                 }
             }
-        }
-        else
-        {
-            isFalling = false;
         }
     }
 
@@ -308,7 +309,7 @@ public class PlaverMovement4 : MonoBehaviour
      */
     private void PhysicsApplication()
     {
-        if (Velocity.y <= -6f)
+        if(Velocity.y <= -6f)
         {
             Velocity.y = -7.5f;
         }
@@ -316,21 +317,13 @@ public class PlaverMovement4 : MonoBehaviour
         if (charControl.isGrounded)
         {
             isGrounded = true;
+            isFalling = false;
             Velocity.y = -1f;
             Velocity.y = jumpForce;
         }
         else
         {
-            if (goingDown)
-            {
-                isGrounded = true;
-                Velocity.y -= Gravity * -2f * Time.deltaTime;
-            }
-            else
-            {
-                isGrounded = false;
-                Velocity.y -= Gravity * -2f * Time.deltaTime;
-            }
+            Velocity.y -= Gravity * -2f * Time.deltaTime;
         }
         charControl.Move(Velocity * Time.deltaTime);
     }
