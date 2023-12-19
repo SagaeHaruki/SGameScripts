@@ -19,12 +19,19 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 19, 2023]
+- Code Cleanup
+- Different file for Animation System
+- Speed Change on PlayerState Movement
+- Jump Height Change on Player State Movement
+
+  
+<h1>Previous Changes</h1>
+
 [Dec. 18, 2023]
 - Fix a bug on which the player cannot jump when going down a slope
 - Jump Height adjustments
 - Rework on the new Jumping System
-
-<h1>Previous Changes</h1>
 
 [Dec. 17, 2023]
 - Added a version 4 of the player movement script
