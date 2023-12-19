@@ -6,6 +6,7 @@
 
 - Note that sometime in the future this will be sorted base on the how many objects will be added to the game.
 - If Some Objects can be added here then i will also publicly allow anyone to use it.
+- This is using a Unity Editor version of (2021.3.23f1).
 
 <h1>Future plans:</h1>
 
