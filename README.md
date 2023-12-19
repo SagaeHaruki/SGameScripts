@@ -25,6 +25,7 @@
 - Different file for Animation System
 - Speed Change on PlayerState Movement
 - Jump Height Change on Player State Movement
+- Make the Animation System and IKSytem Required when using the PlayerMovementScript
 
   
 <h1>Previous Changes</h1>
