@@ -16,6 +16,7 @@
 - Sounds based on the terrain
 - Day/Night Cycle
 - NPC Movement & Interaction
+- Achievements (10/10 achievements for now)
 - Might USE Procedural animation on some movements [For some consideration this might not be possible on player movement]
 
 <h1>Current Changes:</h1>
