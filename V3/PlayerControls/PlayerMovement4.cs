@@ -3,19 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlaverMovement4 : MonoBehaviour
+[RequireComponent(typeof(IKSystem))]
+[RequireComponent(typeof(AnimationSystem))]
+public class PlayerMovement4 : MonoBehaviour
 {
     #region Interactibles in unity
     [SerializeField] private CharacterController charControl;
     [SerializeField] private CinemachineFreeLook freelookCam;
     [SerializeField] private Transform CameraAngle;
     [SerializeField] private Animator animator;
-    [SerializeField] private LayerMask LayerMask;
+    [SerializeField] private LayerMask LayerMasks;
     #endregion
 
     #region Physics values
     [SerializeField] private float playerSpeed = 3.2f;
     [SerializeField] private float jumpForce;
+    [SerializeField] private float changeJump = 0f;
     [SerializeField] private float Gravity = -9.81f;
     [SerializeField] private float minHeightDifference = 2.8f;
     [SerializeField] private Vector3 Velocity;
@@ -27,6 +30,7 @@ public class PlaverMovement4 : MonoBehaviour
     #endregion
 
     #region Jump Motion
+    private float sprintingForce = 6.2f;
     private float runningForce = 4.6f;
     private float walkingForce = 2.6f;
     private float duration = 1.2f;
@@ -42,10 +46,10 @@ public class PlaverMovement4 : MonoBehaviour
     #endregion
 
     #region
-    [SerializeField] private string playerState;
-    [SerializeField] private bool isMoving;
+    [SerializeField] public string playerState;
+    [SerializeField] public bool isMoving;
     // Sorts of Movements
-    [SerializeField] private bool isJumping;
+    [SerializeField] public bool isJumping;
     [SerializeField] private bool isWalking;
     [SerializeField] private bool isRunning;
     [SerializeField] private bool isSprinting;
@@ -78,6 +82,8 @@ public class PlaverMovement4 : MonoBehaviour
         PhysicsApplication();
         FallDistance();
         GetSlopeAngle();
+        JumpAndSpeedChange();
+
         float horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
         float vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
 
@@ -100,17 +106,26 @@ public class PlaverMovement4 : MonoBehaviour
             }
             else
             {
-                if (isJumping && isRunning || isJumping && isSprinting)
+                if (isJumping && isRunning && !isSprinting)
                 {
                     Vector3 moveDirection = transform.forward * runningForce + Vector3.up * Velocity.y;
                     charControl.Move(moveDirection * Time.deltaTime);
                     isMoving = false;
+                    print("JR");
                 }
-                else if (isJumping && isWalking)
+                else if (isJumping && isSprinting)
+                {
+                    Vector3 moveDirection = transform.forward * sprintingForce + Vector3.up * Velocity.y;
+                    charControl.Move(moveDirection * Time.deltaTime);
+                    isMoving = false;
+                    print("JS");
+                }
+                else if (isJumping && isWalking && !isSprinting)
                 {
                     Vector3 moveDirection = transform.forward * walkingForce + Vector3.up * Velocity.y;
                     charControl.Move(moveDirection * Time.deltaTime);
                     isMoving = false;
+                    print("JW");
                 }
                 else
                 {
@@ -122,12 +137,11 @@ public class PlaverMovement4 : MonoBehaviour
         {
             isMoving = false;
         }
-
     }
 
     private void GetSlopeAngle()
     {
-        if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, maxRayDistance, LayerMask))
+        if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, maxRayDistance, LayerMasks))
         {
             Vector3 groundNormal = hit.normal;
             slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
@@ -190,14 +204,7 @@ public class PlaverMovement4 : MonoBehaviour
         // Sprinting Section
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            if (isMoving)
-            {
-                isSprinting = true;
-            }
-            else
-            {
-                isSprinting = false;
-            }
+            isSprinting = true;
         }
         else
         {
@@ -213,10 +220,11 @@ public class PlaverMovement4 : MonoBehaviour
                 canJump = true;
             }
         }
+
         if (canJump && Input.GetKeyDown(KeyCode.Space) && !isJumping)
         {
             isJumping = true;
-            jumpForce = 6.5f;
+            jumpForce = changeJump;
         }
         else if (!goingDown && charControl.isGrounded)
         {
@@ -233,7 +241,7 @@ public class PlaverMovement4 : MonoBehaviour
             Ray ray = new Ray(transform.position, Vector3.down);
 
             // Cast a ray downward to detect the ground
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, LayerMask))
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, LayerMasks))
             {
                 float currentHeight = hit.distance;
                 // Check if the character fell from a certain height
@@ -273,18 +281,6 @@ public class PlaverMovement4 : MonoBehaviour
                         playerState = "Sprinting";
                     }
                 }
-                else
-                {
-                    if (isRunning || isSprinting)
-                    {
-                        playerState = "FastJump";
-                    }
-
-                    if (isWalking)
-                    {
-                        playerState = "SlowJump";
-                    }
-                }
             }
             else
             {
@@ -292,9 +288,25 @@ public class PlaverMovement4 : MonoBehaviour
                 {
                     playerState = "Idle";
                 }
+
                 if (isJumping)
                 {
-                    playerState = "SmallJump";
+                    playerState = "Jumped";
+                }
+
+                if (isJumping && isWalking && !isSprinting)
+                {
+                    playerState = "WalkingJump";
+                }
+
+                if (isJumping && isRunning && !isSprinting)
+                {
+                    playerState = "RunningJump";
+                }
+
+                if (isJumping && isSprinting)
+                {
+                    playerState = "SprintingJump";
                 }
             }
         }
@@ -309,7 +321,7 @@ public class PlaverMovement4 : MonoBehaviour
      */
     private void PhysicsApplication()
     {
-        if(Velocity.y <= -6f)
+        if (Velocity.y <= -6f)
         {
             Velocity.y = -7.5f;
         }
@@ -323,8 +335,39 @@ public class PlaverMovement4 : MonoBehaviour
         }
         else
         {
+            isGrounded = false;
             Velocity.y -= Gravity * -2f * Time.deltaTime;
         }
         charControl.Move(Velocity * Time.deltaTime);
+    }
+
+    private void JumpAndSpeedChange()
+    {
+        if (isRunning || isSprinting)
+        {
+            changeJump = 3.4f;
+        }
+        else
+        {
+            changeJump = 4.6f;
+        }
+
+        if (isMoving)
+        {
+            if (playerState == "Running" && !isSprinting)
+            {
+                playerSpeed = 3.9f;
+            }
+
+            if (playerState == "Walking" && !isSprinting)
+            {
+                playerSpeed = 1.4f;
+            }
+
+            if (playerState == "Sprinting")
+            {
+                playerSpeed = 7.2f;
+            }
+        }
     }
 }

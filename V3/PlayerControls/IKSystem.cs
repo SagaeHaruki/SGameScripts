@@ -6,72 +6,68 @@ using UnityEngine.XR;
 
 public class IKSystem : MonoBehaviour
 {
-    [SerializeField] public CharacterController charControl;
-    private Animator animator;
+    PlayerMovement4 instance;
+
+    #region Some Vars here
+    [SerializeField] private CharacterController charControl;
+    [SerializeField] private Animator animator;
+    [SerializeField] private LayerMask LayerMasks;
+    [SerializeField] public string playerState;
+    #endregion
+
+    #region booleans
+    [SerializeField] private bool useProIK = false;
+    [SerializeField] private bool isMoving;
+    [SerializeField] private bool isJumping;
+    [SerializeField] private bool startIK;
+    [SerializeField] private bool enableFeetIk = true;
+    [SerializeField] private bool showDebugs = true;
+    #endregion
+
+    #region All about the foot ik system
+    [Range(0, 2)][SerializeField] public float pelvisLowerOffset = 0.05f;
+    [SerializeField] private float heightFromGround = 0.45f;
+    [SerializeField] private float raycastDownDistance = 0.45f;
+    [SerializeField] private float pelvisOffset = 0f;
+    [SerializeField] private float pelvisUpDownSpeed = 0.8f;
+    [SerializeField] private float feetIkPosSpeed = 0.12f;
+    #endregion
+
+    #region Some useful things
     private Vector3 leftFootPos, leftFootIkPos;
     private Vector3 rightFootPos, rightFootIkPos;
     private Quaternion leftFootIkRot, rightFootIkRot;
     private float lastPelvisPosY, lastLeftFotPosY, lastRightFotPosY;
-    private bool isJumping;
-    private bool isMoving;
-    private bool isFalling;
-    private bool startIK;
-    private bool enableFeetIk = true;
-    [SerializeField] private bool useProIK = false;
-    private bool showDebugs = true;
-    [SerializeField] private float heightFromGround = 0.45f;
-    [SerializeField] private float raycastDownDistance = 0.45f;
-    [SerializeField] private LayerMask LayerMask;
-    [SerializeField] private float pelvisOffset = 0f;
-    [SerializeField] private float pelvisUpDownSpeed = 0.8f;
-    [SerializeField] private float feetIkPosSpeed = 0.12f;
-    [Range(0, 2)][SerializeField] public float pelvisLowerOffset = 0.05f;
+    #endregion
+
+    #region Curves for the animator
     public string leftFootAnim = "LeftFootCurve";
     public string rightFootAnim = "RightFootCurve";
+    #endregion
 
-    public float maxRayDistance = 1.0f;
-    float slopeAngle;
+    #region Slopes
+    private float maxRayDistance = 1.0f;
+    private float slopeAngle;
+    #endregion
 
     private void Start()
     {
         animator = GetComponent<Animator>();
         charControl = GetComponent<CharacterController>();
+        instance = GetComponent<PlayerMovement4>();
     }
 
     private void Update()
     {
         ChangeState();
         GetSlopeAngle();
-        float horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
-        float vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
-        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
-
-        if (direction.magnitude >= 0.1f)
-        {
-            if (!isJumping)
-            {
-                isMoving = true;
-            }
-        }
-        else
-        {
-            isMoving = false;
-        }
-
-        if (Input.GetButtonDown("Jump") && !isJumping)
-        {
-            isJumping = true;
-        }
-
-        if (charControl.isGrounded)
-        {
-            isJumping = false;
-        }
+        isMoving = instance.isMoving;
+        isJumping = instance.isJumping;
     }
 
     private void GetSlopeAngle()
     {
-        if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, maxRayDistance, LayerMask))
+        if (Physics.Raycast(transform.position, -Vector3.up, out RaycastHit hit, maxRayDistance, LayerMasks))
         {
             Vector3 groundNormal = hit.normal;
             slopeAngle = Vector3.Angle(groundNormal, Vector3.up);
@@ -116,9 +112,14 @@ public class IKSystem : MonoBehaviour
             }
             else
             {
-                heightFromGround = 0.45f;
-                raycastDownDistance = 0.45f;
+                heightFromGround = 0.43f;
+                raycastDownDistance = 0.43f;
             }
+        }
+        else
+        {
+            heightFromGround = 0.43f;
+            raycastDownDistance = 0.43f;
         }
     }
 
@@ -251,7 +252,7 @@ public class IKSystem : MonoBehaviour
                 Debug.DrawLine(fromSkyPos, fromSkyPos + Vector3.down * (raycastDownDistance + heightFromGround), Color.yellow);
             }
 
-            if (Physics.Raycast(fromSkyPos, Vector3.down, out footHit, raycastDownDistance + heightFromGround, LayerMask))
+            if (Physics.Raycast(fromSkyPos, Vector3.down, out footHit, raycastDownDistance + heightFromGround, LayerMasks))
             {
                 ikFeetPos = fromSkyPos;
                 ikFeetPos.y = footHit.point.y + pelvisOffset;
