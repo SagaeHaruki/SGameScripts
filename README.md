@@ -21,15 +21,20 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 20, 2023]
+- Code Cleanup
+- Break Today
+- Re-Arrangement of some files
+
+  
+<h1>Previous Changes</h1>
+
 [Dec. 19, 2023]
 - Code Cleanup
 - Different file for Animation System
 - Speed Change on PlayerState Movement
 - Jump Height Change on Player State Movement
 - Make the Animation System and IKSytem Required when using the PlayerMovementScript
-
-  
-<h1>Previous Changes</h1>
 
 [Dec. 18, 2023]
 - Fix a bug on which the player cannot jump when going down a slope
