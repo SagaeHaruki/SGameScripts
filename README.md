@@ -25,7 +25,7 @@
 - Code Cleanup
 - Break Today
 - Re-Arrangement of some files
-
+- Re-Planning of the storyline
   
 <h1>Previous Changes</h1>
 
