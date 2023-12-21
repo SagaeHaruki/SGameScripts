@@ -25,6 +25,7 @@
 - Fix on Attack Script, some inverted codes
 - Fix velocity change
 - Added Delay when falling to prevent any glitches
+- Gravity adjustments
   
 <h1>Previous Changes</h1>
 
