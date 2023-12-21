@@ -26,6 +26,7 @@ public class PlayerMovement4 : MonoBehaviour
     [SerializeField] private float changeJump = 0f;
     [SerializeField] private float Gravity = -9.81f;
     [SerializeField] private float minHeightDifference = 2.8f;
+    [SerializeField] private float fallDelay = -3.2f;
     [SerializeField] private Vector3 Velocity;
     #endregion
 
@@ -73,6 +74,7 @@ public class PlayerMovement4 : MonoBehaviour
     {
         charControl = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        attckInst = GetComponent<AttackingScript>();
         playerState = "Idle";
         isRunning = true;
 
@@ -119,21 +121,18 @@ public class PlayerMovement4 : MonoBehaviour
                         Vector3 moveDirection = transform.forward * runningForce + Vector3.up * Velocity.y;
                         charControl.Move(moveDirection * Time.deltaTime);
                         isMoving = false;
-                        print("JR");
                     }
                     else if (isJumping && isSprinting)
                     {
                         Vector3 moveDirection = transform.forward * sprintingForce + Vector3.up * Velocity.y;
                         charControl.Move(moveDirection * Time.deltaTime);
                         isMoving = false;
-                        print("JS");
                     }
                     else if (isJumping && isWalking && !isSprinting)
                     {
                         Vector3 moveDirection = transform.forward * walkingForce + Vector3.up * Velocity.y;
                         charControl.Move(moveDirection * Time.deltaTime);
                         isMoving = false;
-                        print("JW");
                     }
                     else
                     {
@@ -258,7 +257,10 @@ public class PlayerMovement4 : MonoBehaviour
                 {
                     Vector3 moveDirection = transform.forward * 1.2f + Vector3.up * Velocity.y;
                     charControl.Move(moveDirection * Time.deltaTime);
-                    isFalling = true;
+                    if (Velocity.y <= fallDelay)
+                    {
+                        isFalling = true;
+                    }
                 }
             }
         }
@@ -298,7 +300,7 @@ public class PlayerMovement4 : MonoBehaviour
                     playerState = "Idle";
                 }
 
-                if (isJumping)
+                if (isJumping && !isMoving)
                 {
                     playerState = "Jumped";
                 }
@@ -330,7 +332,7 @@ public class PlayerMovement4 : MonoBehaviour
      */
     private void PhysicsApplication()
     {
-        if (Velocity.y <= -6f)
+        if (Velocity.y <= -7.5f)
         {
             Velocity.y = -7.5f;
         }
@@ -339,7 +341,7 @@ public class PlayerMovement4 : MonoBehaviour
         {
             isGrounded = true;
             isFalling = false;
-            Velocity.y = -1f;
+            Velocity.y = -0.8f;
             Velocity.y = jumpForce;
         }
         else
@@ -361,7 +363,12 @@ public class PlayerMovement4 : MonoBehaviour
             changeJump = 4.6f;
         }
 
-        if (isMoving)
+        if (isFalling)
+        {
+            playerSpeed = 2.2f;
+        }
+
+        if (isMoving && !isFalling)
         {
             if (playerState == "Running" && !isSprinting)
             {

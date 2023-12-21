@@ -8,11 +8,14 @@ public class AttackingScript : MonoBehaviour
     [SerializeField] public bool isAttacking;
     [SerializeField] private bool isFalling;
     [SerializeField] private bool isJumping;
-    [SerializeField] public int attackType;
 
+    [SerializeField] public string attackType;
 
-    private float attackTimer = 0f;
-    private float attackDuration = 2.2f;
+    [SerializeField] private float nextAttack = 0f;
+    [SerializeField] private float lastAttack = 0f;
+    [SerializeField] private int comboCount = 0;
+    [SerializeField] private float attackCd = 2f;
+   
 
     private void Start()
     {
@@ -21,34 +24,57 @@ public class AttackingScript : MonoBehaviour
 
     private void Update()
     {
-        pmInstance.isFalling = isFalling;
-        pmInstance.isJumping = isJumping;
+        isFalling = pmInstance.isFalling;
+        isJumping = pmInstance.isJumping;
 
-        GetAttackInpt();
+        if (!isJumping || !isFalling)
+        {
+            GetAttackInpt();
+            ChangeAttack();
+        }
     }
 
     private void GetAttackInpt()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKeyDown(KeyCode.Mouse0) && Time.time > nextAttack)
         {
-            isAttacking = true;
-            attackType++;
-            print("Clicked!");
-        }
-
-        if (attackType == 3)
-        {
-            attackType = 0;
-        }
-
-        if (isAttacking)
-        {
-            if (attackTimer >= attackDuration)
+            if (Time.time - lastAttack > attackCd)
             {
-                isAttacking = false;
-                attackType = 0;
-                attackTimer = 0f;
+                comboCount = 0;
             }
+
+            lastAttack = Time.time;
+            nextAttack = Time.time + attackCd;
+
+            comboCount++;
+
+            if (comboCount > 3)
+            {
+                comboCount = 1;
+            }
+        }
+    }
+
+    private void ChangeAttack()
+    {
+        if (comboCount == 0)
+        {
+            attackType = "";
+        }
+
+        if(comboCount == 1)
+        {
+            attackType = "FirstAttack";
+        }
+
+        if (comboCount == 2)
+        {
+            attackType = "SecondtAttack";
+        }
+
+        if (comboCount == 3)
+        {
+            attackType = "ThirdAttack";
         }
     }
 }
