@@ -21,13 +21,16 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 21, 2023]
+- Minor Changes
+  
+<h1>Previous Changes</h1>
+
 [Dec. 20, 2023]
 - Code Cleanup
 - Break Today
 - Re-Arrangement of some files
 - Re-Planning of the storyline
-  
-<h1>Previous Changes</h1>
 
 [Dec. 19, 2023]
 - Code Cleanup
