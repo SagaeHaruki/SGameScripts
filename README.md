@@ -23,7 +23,7 @@
 
 [Dec. 21, 2023]
 - Minor Changes
-- Attack System
+- Implementing the Attack System
   
 <h1>Previous Changes</h1>
 
