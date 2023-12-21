@@ -24,6 +24,7 @@
 [Dec. 21, 2023]
 - Minor Changes
 - Implementing the Attack System
+- Attack Cooldown
   
 <h1>Previous Changes</h1>
 
