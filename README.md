@@ -21,13 +21,18 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 22, 2023]
+- Fix on Attack Script, some inverted codes
+- Fix velocity change
+- Added Delay when falling
+  
+<h1>Previous Changes</h1>
+
 [Dec. 21, 2023]
 - Minor Changes
 - Implementing the Attack System
 - Attack Cooldown
 - Attack Types
-  
-<h1>Previous Changes</h1>
 
 [Dec. 20, 2023]
 - Code Cleanup
