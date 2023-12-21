@@ -24,7 +24,7 @@
 [Dec. 22, 2023]
 - Fix on Attack Script, some inverted codes
 - Fix velocity change
-- Added Delay when falling
+- Added Delay when falling to prevent any glitches
   
 <h1>Previous Changes</h1>
 
