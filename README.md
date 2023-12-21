@@ -25,6 +25,7 @@
 - Minor Changes
 - Implementing the Attack System
 - Attack Cooldown
+- Attack Types
   
 <h1>Previous Changes</h1>
 
