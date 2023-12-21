@@ -5,8 +5,13 @@ using UnityEngine;
 
 [RequireComponent(typeof(IKSystem))]
 [RequireComponent(typeof(AnimationSystem))]
+[RequireComponent(typeof(AttackingScript))]
 public class PlayerMovement4 : MonoBehaviour
 {
+    #region Instances
+    AttackingScript attckInst;
+    #endregion
+
     #region Interactibles in unity
     [SerializeField] private CharacterController charControl;
     [SerializeField] private CinemachineFreeLook freelookCam;
@@ -53,10 +58,11 @@ public class PlayerMovement4 : MonoBehaviour
     [SerializeField] private bool isWalking;
     [SerializeField] private bool isRunning;
     [SerializeField] private bool isSprinting;
+    [SerializeField] private bool isAttacking;
 
     // Falling or Grounded
-    [SerializeField] private bool isFalling;
-    [SerializeField] private bool isGrounded;
+    [SerializeField] public bool isFalling;
+    [SerializeField] public bool isGrounded;
     [SerializeField] private bool onSlope;
     [SerializeField] private bool goingUp;
     [SerializeField] private bool goingDown;
@@ -90,46 +96,49 @@ public class PlayerMovement4 : MonoBehaviour
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
         if (direction.magnitude >= 0.1f)
         {
-            if (!isJumping || isFalling)
+            if (!isAttacking)
             {
-                // This Section will calculate the direction of the player, then smoothens it rotation based on the calulated direction
-                float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
-                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
-                transform.rotation = Quaternion.Euler(0f, angle, 0f);
+                if (!isJumping || isFalling)
+                {
+                    // This Section will calculate the direction of the player, then smoothens it rotation based on the calulated direction
+                    float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraAngle.eulerAngles.y;
+                    float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref smoothingVelocity, turnSmoothing);
+                    transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
 
-                // This moves the player based on its forward direction
-                Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-                charControl.Move(newDirection.normalized * playerSpeed * Time.deltaTime);
-                isMoving = true;
+                    // This moves the player based on its forward direction
+                    Vector3 newDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+                    charControl.Move(newDirection.normalized * playerSpeed * Time.deltaTime);
+                    isMoving = true;
 
-            }
-            else
-            {
-                if (isJumping && isRunning && !isSprinting)
-                {
-                    Vector3 moveDirection = transform.forward * runningForce + Vector3.up * Velocity.y;
-                    charControl.Move(moveDirection * Time.deltaTime);
-                    isMoving = false;
-                    print("JR");
-                }
-                else if (isJumping && isSprinting)
-                {
-                    Vector3 moveDirection = transform.forward * sprintingForce + Vector3.up * Velocity.y;
-                    charControl.Move(moveDirection * Time.deltaTime);
-                    isMoving = false;
-                    print("JS");
-                }
-                else if (isJumping && isWalking && !isSprinting)
-                {
-                    Vector3 moveDirection = transform.forward * walkingForce + Vector3.up * Velocity.y;
-                    charControl.Move(moveDirection * Time.deltaTime);
-                    isMoving = false;
-                    print("JW");
                 }
                 else
                 {
+                    if (isJumping && isRunning && !isSprinting)
+                    {
+                        Vector3 moveDirection = transform.forward * runningForce + Vector3.up * Velocity.y;
+                        charControl.Move(moveDirection * Time.deltaTime);
+                        isMoving = false;
+                        print("JR");
+                    }
+                    else if (isJumping && isSprinting)
+                    {
+                        Vector3 moveDirection = transform.forward * sprintingForce + Vector3.up * Velocity.y;
+                        charControl.Move(moveDirection * Time.deltaTime);
+                        isMoving = false;
+                        print("JS");
+                    }
+                    else if (isJumping && isWalking && !isSprinting)
+                    {
+                        Vector3 moveDirection = transform.forward * walkingForce + Vector3.up * Velocity.y;
+                        charControl.Move(moveDirection * Time.deltaTime);
+                        isMoving = false;
+                        print("JW");
+                    }
+                    else
+                    {
 
+                    }
                 }
             }
         }
