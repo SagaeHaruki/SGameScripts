@@ -23,6 +23,7 @@
 
 [Dec. 21, 2023]
 - Minor Changes
+- Attack System
   
 <h1>Previous Changes</h1>
 
