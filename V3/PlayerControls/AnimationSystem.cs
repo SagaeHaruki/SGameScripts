@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class AnimationSystem : MonoBehaviour
 {
@@ -10,6 +11,11 @@ public class AnimationSystem : MonoBehaviour
     [SerializeField] private string playerStatus;
     [SerializeField] private bool isMoving;
     [SerializeField] private bool isJumping;
+    [SerializeField] private bool isRunning;
+    [SerializeField] private bool isWalking;
+    [SerializeField] private bool isSprinting;
+
+    [SerializeField] private bool currentlyMoving;
 
     private void Start()
     {
@@ -22,6 +28,10 @@ public class AnimationSystem : MonoBehaviour
         playerStatus = instance.playerState;
         isMoving = instance.isMoving;
         isJumping = instance.isJumping;
+        isRunning = instance.isRunning;
+        isWalking = instance.isWalking;
+        isSprinting = instance.isSprinting;
+        currentlyMoving = instance.currentlyMoving;
 
         if (playerStatus != "Falling")
         {
@@ -33,6 +43,8 @@ public class AnimationSystem : MonoBehaviour
                     animator.SetBool("isRunning", true);
                     animator.SetBool("isWalking", false);
                     animator.SetBool("isSprinting", false);
+                    animator.SetBool("isJumping", false);
+
                 }
 
                 if (playerStatus == "Walking")
@@ -40,6 +52,7 @@ public class AnimationSystem : MonoBehaviour
                     animator.SetBool("isWalking", true);
                     animator.SetBool("isRunning", false);
                     animator.SetBool("isSprinting", false);
+                    animator.SetBool("isJumping", false);
                 }
 
                 if (playerStatus == "Sprinting")
@@ -47,18 +60,48 @@ public class AnimationSystem : MonoBehaviour
                     animator.SetBool("isSprinting", true);
                     animator.SetBool("isWalking", false);
                     animator.SetBool("isRunning", false);
+                    animator.SetBool("isJumping", false);
                 }
             }
             else
             {
                 if (!isJumping) 
                 {
-                    animator.SetBool("isWalking", false);
-                    animator.SetBool("isRunning", false);
-                    animator.SetBool("isSprinting", false);
-                    animator.SetBool("isFalling", false);
+                    animator.SetBool("isJumping", false);
                 }
 
+                if (currentlyMoving)
+                {
+                    if (isJumping && isWalking && !isSprinting)
+                    {
+                        animator.SetBool("isJumping", true);
+                    }
+
+                    if (isJumping && isRunning && !isSprinting)
+                    {
+                        animator.SetBool("isJumping", true);
+                    }
+
+                    if (isJumping && isSprinting)
+                    {
+                        animator.SetBool("isJumping", true);
+                    }
+                }
+                else
+                {
+                    if (playerStatus == "Jumped")
+                    {
+                        animator.SetBool("isJumping", true);
+                    }
+
+                    if(playerStatus == "Idle")
+                    {
+                        animator.SetBool("isRunning", false);
+                        animator.SetBool("isWalking", false);
+                        animator.SetBool("isSprinting", false);
+                        animator.SetBool("isJumping", false);
+                    }
+                }
             }
         }
         else

@@ -24,6 +24,7 @@ public class PlayerMovement4 : MonoBehaviour
     [SerializeField] private float playerSpeed = 3.2f;
     [SerializeField] private float jumpForce;
     [SerializeField] private float changeJump = 0f;
+    [SerializeField] private float addJumpForce = 0f;
     [SerializeField] private float Gravity = -9.81f;
     [SerializeField] private float minHeightDifference = 2.8f;
     [SerializeField] private float fallDelay = -3.2f;
@@ -56,10 +57,11 @@ public class PlayerMovement4 : MonoBehaviour
     [SerializeField] public bool isMoving;
     // Sorts of Movements
     [SerializeField] public bool isJumping;
-    [SerializeField] private bool isWalking;
-    [SerializeField] private bool isRunning;
-    [SerializeField] private bool isSprinting;
+    [SerializeField] public bool isWalking;
+    [SerializeField] public bool isRunning;
+    [SerializeField] public bool isSprinting;
     [SerializeField] private bool isAttacking;
+    [SerializeField] public bool currentlyMoving;
 
     // Falling or Grounded
     [SerializeField] public bool isFalling;
@@ -85,6 +87,9 @@ public class PlayerMovement4 : MonoBehaviour
 
     private void Update()
     {
+        float newJump = changeJump + addJumpForce;
+        changeJump = newJump;
+
         ChangeState();
         GetKeyPress();
         PhysicsApplication();
@@ -94,6 +99,15 @@ public class PlayerMovement4 : MonoBehaviour
 
         float horizontal = Input.GetKey(KeyCode.A) ? -1f : Input.GetKey(KeyCode.D) ? 1f : 0f;
         float vertical = Input.GetKey(KeyCode.W) ? 1f : Input.GetKey(KeyCode.S) ? -1f : 0f;
+
+        if (Mathf.Abs(horizontal) > 0.2f || Mathf.Abs(vertical) > 0.2f)
+        {
+            currentlyMoving = true;
+        }
+        else
+        {
+            currentlyMoving = false;
+        }
 
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
         if (direction.magnitude >= 0.1f)
@@ -255,11 +269,18 @@ public class PlayerMovement4 : MonoBehaviour
                 // Check if the character fell from a certain height
                 if (currentHeight >= minHeightDifference)
                 {
-                    Vector3 moveDirection = transform.forward * 1.2f + Vector3.up * Velocity.y;
-                    charControl.Move(moveDirection * Time.deltaTime);
-                    if (Velocity.y <= fallDelay)
+                    if (currentHeight > 2.9f)
                     {
-                        isFalling = true;
+                        Vector3 moveDirection = transform.forward * 1.2f + Vector3.up * Velocity.y;
+                        charControl.Move(moveDirection * Time.deltaTime);
+                        if (Velocity.y <= fallDelay)
+                        {
+                            isFalling = true;
+                        }
+                    }
+                    else
+                    {
+                        isFalling = false;
                     }
                 }
             }
@@ -300,24 +321,29 @@ public class PlayerMovement4 : MonoBehaviour
                     playerState = "Idle";
                 }
 
-                if (isJumping && !isMoving)
+                if (currentlyMoving)
                 {
-                    playerState = "Jumped";
-                }
+                    if (isJumping && isWalking && !isSprinting)
+                    {
+                        playerState = "WalkingJump";
+                    }
 
-                if (isJumping && isWalking && !isSprinting)
-                {
-                    playerState = "WalkingJump";
-                }
+                    if (isJumping && isRunning && !isSprinting)
+                    {
+                        playerState = "RunningJump";
+                    }
 
-                if (isJumping && isRunning && !isSprinting)
-                {
-                    playerState = "RunningJump";
+                    if (isJumping && isSprinting)
+                    {
+                        playerState = "SprintingJump";
+                    }
                 }
-
-                if (isJumping && isSprinting)
+                else
                 {
-                    playerState = "SprintingJump";
+                    if (isJumping)
+                    {
+                        playerState = "Jumped";
+                    }
                 }
             }
         }
@@ -354,13 +380,20 @@ public class PlayerMovement4 : MonoBehaviour
 
     private void JumpAndSpeedChange()
     {
-        if (isRunning || isSprinting)
+        if (currentlyMoving)
         {
-            changeJump = 3.4f;
+            if (isRunning || isSprinting)
+            {
+                changeJump = 4.8f;
+            }
+            else if (isWalking)
+            {
+                changeJump = 4.6f;
+            }
         }
         else
         {
-            changeJump = 4.6f;
+            changeJump = 6.2f;
         }
 
         if (isFalling)
