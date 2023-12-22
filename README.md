@@ -25,9 +25,10 @@
 - Fix some jump animations
 - Fix some issues when running
 - Re-mapping the animation
-- 
+- Jump Height Adjustments
   
 <h1>Previous Changes</h1>
+
 [Dec. 22, 2023]
 - Fix on Attack Script, some inverted codes
 - Fix velocity change
