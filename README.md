@@ -21,13 +21,18 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 23, 2023]
+- Fix some jump animations
+- Fix some issues when running
+- Re-mapping the animation
+- 
+  
+<h1>Previous Changes</h1>
 [Dec. 22, 2023]
 - Fix on Attack Script, some inverted codes
 - Fix velocity change
 - Added Delay when falling to prevent any glitches
 - Gravity adjustments
-  
-<h1>Previous Changes</h1>
 
 [Dec. 21, 2023]
 - Minor Changes
