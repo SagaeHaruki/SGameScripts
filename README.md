@@ -24,6 +24,7 @@
 [Dec. 23, 2023]
 - Experimental glide physics (Might not implement)
 - Some Animation have different exit animations (Stopping animations)
+- Removal of isFalling Updates
 - Minor Changes
   
 <h1>Previous Changes</h1>
