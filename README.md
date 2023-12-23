@@ -22,10 +22,7 @@
 <h1>Current Changes:</h1>
 
 [Dec. 23, 2023]
-- Fix some jump animations
-- Fix some issues when running
-- Re-mapping the animation
-- Jump Height Adjustments
+- Experimental glide physics (Might not implement)
   
 <h1>Previous Changes</h1>
 
@@ -34,6 +31,11 @@
 - Fix velocity change
 - Added Delay when falling to prevent any glitches
 - Gravity adjustments
+- Fix some jump animations
+- Fix some issues when running
+- Re-mapping the animation
+- Jump Height Adjustments
+
 
 [Dec. 21, 2023]
 - Minor Changes
