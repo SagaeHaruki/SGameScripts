@@ -71,6 +71,8 @@ public class PlayerMovement4 : MonoBehaviour
     [SerializeField] private bool goingDown;
     #endregion
 
+    [SerializeField] private bool glide;
+
 
     private void Start()
     {
@@ -253,6 +255,15 @@ public class PlayerMovement4 : MonoBehaviour
             jumpForce = 0f;
             isJumping = false;
         }
+
+        if(Input.GetKey(KeyCode.K))
+        {
+            glide = true;
+        }
+        else 
+        {
+            glide = false;
+        }
     }
 
     private void FallDistance()
@@ -269,18 +280,11 @@ public class PlayerMovement4 : MonoBehaviour
                 // Check if the character fell from a certain height
                 if (currentHeight >= minHeightDifference)
                 {
-                    if (currentHeight > 2.9f)
+                    Vector3 moveDirection = transform.forward * 1.2f + Vector3.up * Velocity.y;
+                    charControl.Move(moveDirection * Time.deltaTime);
+                    if (Velocity.y <= fallDelay)
                     {
-                        Vector3 moveDirection = transform.forward * 1.2f + Vector3.up * Velocity.y;
-                        charControl.Move(moveDirection * Time.deltaTime);
-                        if (Velocity.y <= fallDelay)
-                        {
-                            isFalling = true;
-                        }
-                    }
-                    else
-                    {
-                        isFalling = false;
+                        isFalling = true;
                     }
                 }
             }
@@ -366,14 +370,23 @@ public class PlayerMovement4 : MonoBehaviour
         if (charControl.isGrounded)
         {
             isGrounded = true;
-            isFalling = false;
-            Velocity.y = -0.8f;
+            Velocity.y = -1f;
             Velocity.y = jumpForce;
+            isFalling = false;
         }
         else
         {
-            isGrounded = false;
-            Velocity.y -= Gravity * -2f * Time.deltaTime;
+            if (!glide)
+            {
+                isGrounded = false;
+                Velocity.y -= Gravity * -2f * Time.deltaTime;
+            }
+            else
+            {
+                isGrounded = false;
+                Velocity.y -= Gravity * 0.5f * Time.deltaTime;
+            }
+            
         }
         charControl.Move(Velocity * Time.deltaTime);
     }
