@@ -21,13 +21,16 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 24, 2023]
+- Fix IK system for better foot positioning when going up the ladder
+  
+<h1>Previous Changes</h1>
+
 [Dec. 23, 2023]
 - Experimental glide physics (Might not implement)
 - Some Animation have different exit animations (Stopping animations)
 - Removal of isFalling Updates
 - Minor Changes
-  
-<h1>Previous Changes</h1>
 
 [Dec. 22, 2023]
 - Fix on Attack Script, some inverted codes
