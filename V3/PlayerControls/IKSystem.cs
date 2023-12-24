@@ -19,6 +19,8 @@ public class IKSystem : MonoBehaviour
     [SerializeField] private bool useProIK = false;
     [SerializeField] private bool isMoving;
     [SerializeField] private bool isJumping;
+    [SerializeField] private bool currentlyMoving;
+    [SerializeField] private bool onSlope;
     [SerializeField] private bool startIK;
     [SerializeField] private bool enableFeetIk = true;
     [SerializeField] private bool showDebugs = true;
@@ -63,6 +65,8 @@ public class IKSystem : MonoBehaviour
         GetSlopeAngle();
         isMoving = instance.isMoving;
         isJumping = instance.isJumping;
+        currentlyMoving = instance.currentlyMoving;
+        onSlope = instance.onSlope;
     }
 
     private void GetSlopeAngle()
@@ -78,7 +82,7 @@ public class IKSystem : MonoBehaviour
 
     private void ChangeState()
     {
-        if (isMoving)
+        if (currentlyMoving)
         {
             if (slopeAngle >= 40 && slopeAngle <= 45)
             {
@@ -126,7 +130,7 @@ public class IKSystem : MonoBehaviour
     #region Ground
     private void FixedUpdate()
     {
-        if (!isJumping)
+        if (onSlope || !isMoving)
         {
             if (enableFeetIk == false)
             {
@@ -148,7 +152,7 @@ public class IKSystem : MonoBehaviour
 
     private void OnAnimatorIK(int layerIndex)
     {
-        if (!isJumping)
+        if (onSlope || !isMoving)
         {
             if (enableFeetIk == false)
             {
@@ -183,7 +187,7 @@ public class IKSystem : MonoBehaviour
 
     void MoveToIKPoint(AvatarIKGoal foot, Vector3 posIKHolder, Quaternion rotIKHolder, ref float lastFootPosY)
     {
-        if (!isJumping)
+        if (onSlope || !isMoving)
         {
             Vector3 targetIkPos = animator.GetIKPosition(foot);
             if (posIKHolder != Vector3.zero)
@@ -202,7 +206,7 @@ public class IKSystem : MonoBehaviour
 
     private void MovePelvisHeight()
     {
-        if (!isJumping)
+        if (onSlope || !isMoving)
         {
             if (rightFootIkPos == Vector3.zero || leftFootIkPos == Vector3.zero || lastPelvisPosY == 0)
             {
@@ -243,7 +247,7 @@ public class IKSystem : MonoBehaviour
 
     private void FeetPositionSolver(Vector3 fromSkyPos, ref Vector3 ikFeetPos, ref Quaternion feetIkRot)
     {
-        if (!isJumping)
+        if (onSlope || !isMoving)
         {
             // Raycasting Section
             RaycastHit footHit;
@@ -264,9 +268,9 @@ public class IKSystem : MonoBehaviour
     }
 
     private void AdjustTargetFeet(ref Vector3 feetPositions, HumanBodyBones foot)
-    {
-        if (!isJumping)
-        { 
+    {       
+        if (onSlope || !isMoving)
+        {
             feetPositions = animator.GetBoneTransform(foot).position;
             feetPositions.y = transform.position.y + heightFromGround;
         }

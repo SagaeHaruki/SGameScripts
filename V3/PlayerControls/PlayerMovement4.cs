@@ -66,13 +66,10 @@ public class PlayerMovement4 : MonoBehaviour
     // Falling or Grounded
     [SerializeField] public bool isFalling;
     [SerializeField] public bool isGrounded;
-    [SerializeField] private bool onSlope;
+    [SerializeField] public bool onSlope;
     [SerializeField] private bool goingUp;
     [SerializeField] private bool goingDown;
     #endregion
-
-    [SerializeField] private bool glide;
-
 
     private void Start()
     {
@@ -255,15 +252,6 @@ public class PlayerMovement4 : MonoBehaviour
             jumpForce = 0f;
             isJumping = false;
         }
-
-        if(Input.GetKey(KeyCode.K))
-        {
-            glide = true;
-        }
-        else 
-        {
-            glide = false;
-        }
     }
 
     private void FallDistance()
@@ -376,17 +364,8 @@ public class PlayerMovement4 : MonoBehaviour
         }
         else
         {
-            if (!glide)
-            {
-                isGrounded = false;
-                Velocity.y -= Gravity * -2f * Time.deltaTime;
-            }
-            else
-            {
-                isGrounded = false;
-                Velocity.y -= Gravity * 0.5f * Time.deltaTime;
-            }
-            
+            isGrounded = false;
+            Velocity.y -= Gravity * -2f * Time.deltaTime;
         }
         charControl.Move(Velocity * Time.deltaTime);
     }
