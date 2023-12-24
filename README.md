@@ -24,6 +24,7 @@
 [Dec. 24, 2023]
 - Fix IK system for better foot positioning when going up the ladder
 - Small adjustments to the pevlis position
+- Sprinting condition changed
 - Removal of the Gliding Concept (Unecessary implementation)
   
 <h1>Previous Changes</h1>
