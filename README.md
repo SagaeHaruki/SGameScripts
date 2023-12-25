@@ -22,12 +22,16 @@
 <h1>Current Changes:</h1>
 
 [Dec. 24, 2023]
+- Switch from Freelook Camera to Virtual Camera (This is Much Better)
+- Will change the Camera Script after optimizing the Virtual Camera
+  
+<h1>Previous Changes</h1>
+
+[Dec. 24, 2023]
 - Fix IK system for better foot positioning when going up the ladder
 - Small adjustments to the pevlis position
 - Sprinting condition changed
 - Removal of the Gliding Concept (Unecessary implementation)
-  
-<h1>Previous Changes</h1>
 
 [Dec. 23, 2023]
 - Experimental glide physics (Might not implement)
