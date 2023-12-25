@@ -14,7 +14,7 @@ public class PlayerMovement4 : MonoBehaviour
 
     #region Interactibles in unity
     [SerializeField] private CharacterController charControl;
-    [SerializeField] private CinemachineFreeLook freelookCam;
+    [SerializeField] private CinemachineVirtualCamera virtualCamera;
     [SerializeField] private Transform CameraAngle;
     [SerializeField] private Animator animator;
     [SerializeField] private LayerMask LayerMasks;
