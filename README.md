@@ -21,11 +21,15 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 26, 2023]
+- Implemented a new Camera Zoom System for the Virtual Camera
+- 
+  
+<h1>Previous Changes</h1>
+
 [Dec. 25, 2023]
 - Switch from Freelook Camera to Virtual Camera (This is Much Better)
 - Will change the Camera Script after optimizing the Virtual Camera
-  
-<h1>Previous Changes</h1>
 
 [Dec. 24, 2023]
 - Fix IK system for better foot positioning when going up the ladder
