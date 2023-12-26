@@ -23,7 +23,7 @@
 
 [Dec. 26, 2023]
 - Implemented a new Camera Zoom System for the Virtual Camera
-- 
+- Small Tweaks on IK System
   
 <h1>Previous Changes</h1>
 
