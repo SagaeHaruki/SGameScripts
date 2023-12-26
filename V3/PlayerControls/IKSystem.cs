@@ -130,55 +130,61 @@ public class IKSystem : MonoBehaviour
     #region Ground
     private void FixedUpdate()
     {
-        if (onSlope || !isMoving)
+        if (!isJumping)
         {
-            if (enableFeetIk == false)
+            if (onSlope || !isMoving)
             {
-                return;
+                if (enableFeetIk == false)
+                {
+                    return;
+                }
+
+                if (animator == null)
+                {
+                    return;
+                }
+
+                AdjustTargetFeet(ref rightFootPos, HumanBodyBones.RightFoot);
+                AdjustTargetFeet(ref leftFootPos, HumanBodyBones.LeftFoot);
+
+                FeetPositionSolver(rightFootPos, ref rightFootIkPos, ref rightFootIkRot);
+                FeetPositionSolver(leftFootPos, ref leftFootIkPos, ref leftFootIkRot);
             }
-
-            if (animator == null)
-            {
-                return;
-            }
-
-            AdjustTargetFeet(ref rightFootPos, HumanBodyBones.RightFoot);
-            AdjustTargetFeet(ref leftFootPos, HumanBodyBones.LeftFoot);
-
-            FeetPositionSolver(rightFootPos, ref rightFootIkPos, ref rightFootIkRot);
-            FeetPositionSolver(leftFootPos, ref leftFootIkPos, ref leftFootIkRot);
         }
     }
 
     private void OnAnimatorIK(int layerIndex)
     {
-        if (onSlope || !isMoving)
+        if (!isJumping)
         {
-            if (enableFeetIk == false)
+            if (onSlope || !isMoving)
             {
-                return;
-            }
-            if (animator == null)
-            {
-                return;
-            }
-            MovePelvisHeight();
+                if (enableFeetIk == false)
+                {
+                    return;
+                }
+                if (animator == null)
+                {
+                    return;
+                }
+                MovePelvisHeight();
 
-            // Right Foot ik Position & Rotation
-            animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1f);
-            if (useProIK)
-            {
-                animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, animator.GetFloat(rightFootAnim));
-            }
-            MoveToIKPoint(AvatarIKGoal.RightFoot, rightFootIkPos, rightFootIkRot, ref lastRightFotPosY);
+                // Right Foot ik Position & Rotation
+                animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1f);
+                if (useProIK)
+                {
+                    animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, animator.GetFloat(rightFootAnim));
+                }
+                MoveToIKPoint(AvatarIKGoal.RightFoot, rightFootIkPos, rightFootIkRot, ref lastRightFotPosY);
 
-            // Left Foot ik Position & Rotation
-            animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1f);
-            if (useProIK)
-            {
-                animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, animator.GetFloat(leftFootAnim));
+                // Left Foot ik Position & Rotation
+                animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1f);
+                if (useProIK)
+                {
+                    animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, animator.GetFloat(leftFootAnim));
+                }
+                MoveToIKPoint(AvatarIKGoal.LeftFoot, leftFootIkPos, leftFootIkRot, ref lastLeftFotPosY);
             }
-            MoveToIKPoint(AvatarIKGoal.LeftFoot, leftFootIkPos, leftFootIkRot, ref lastLeftFotPosY);
         }
     }
     #endregion
@@ -187,92 +193,104 @@ public class IKSystem : MonoBehaviour
 
     void MoveToIKPoint(AvatarIKGoal foot, Vector3 posIKHolder, Quaternion rotIKHolder, ref float lastFootPosY)
     {
-        if (onSlope || !isMoving)
+        if (!isJumping)
         {
-            Vector3 targetIkPos = animator.GetIKPosition(foot);
-            if (posIKHolder != Vector3.zero)
+            if (onSlope || !isMoving)
             {
-                targetIkPos = transform.InverseTransformPoint(targetIkPos);
-                posIKHolder = transform.InverseTransformPoint(posIKHolder);
-                float yVar = Mathf.Lerp(lastFootPosY, posIKHolder.y, feetIkPosSpeed);
-                targetIkPos.y += yVar;
-                lastFootPosY = yVar;
-                targetIkPos = transform.TransformPoint(targetIkPos);
-                animator.SetIKRotation(foot, rotIKHolder);
+                Vector3 targetIkPos = animator.GetIKPosition(foot);
+                if (posIKHolder != Vector3.zero)
+                {
+                    targetIkPos = transform.InverseTransformPoint(targetIkPos);
+                    posIKHolder = transform.InverseTransformPoint(posIKHolder);
+                    float yVar = Mathf.Lerp(lastFootPosY, posIKHolder.y, feetIkPosSpeed);
+                    targetIkPos.y += yVar;
+                    lastFootPosY = yVar;
+                    targetIkPos = transform.TransformPoint(targetIkPos);
+                    animator.SetIKRotation(foot, rotIKHolder);
+                }
+                animator.SetIKPosition(foot, targetIkPos);
             }
-            animator.SetIKPosition(foot, targetIkPos);
         }
     }
 
     private void MovePelvisHeight()
     {
-        if (onSlope || !isMoving)
+        if (!isJumping)
         {
-            if (rightFootIkPos == Vector3.zero || leftFootIkPos == Vector3.zero || lastPelvisPosY == 0)
+            if (onSlope || !isMoving)
             {
-                lastPelvisPosY = animator.bodyPosition.y;
-                return;
-            }
-            float leftOffsetPos = leftFootIkPos.y - transform.position.y;
-            float rightOffsetPos = rightFootIkPos.y - transform.position.y;
-            float totalOffsetVal = (leftOffsetPos < rightOffsetPos) ? leftOffsetPos : rightOffsetPos;
-
-            if (!isMoving)
-            {
-                Vector3 newPelvisPos = animator.bodyPosition + Vector3.up * totalOffsetVal;
-                newPelvisPos.y = Mathf.Lerp(lastPelvisPosY, newPelvisPos.y, pelvisUpDownSpeed);
-                animator.bodyPosition = newPelvisPos;
-                lastPelvisPosY = animator.bodyPosition.y;
-            }
-            else
-            {
-                Vector3 upDirection = Vector3.up;
-                RaycastHit hit;
-
-                if (Physics.Raycast(transform.position, -Vector3.up, out hit))
+                if (rightFootIkPos == Vector3.zero || leftFootIkPos == Vector3.zero || lastPelvisPosY == 0)
                 {
-                    upDirection = hit.normal; // Get the surface normal where the character is standing
+                    lastPelvisPosY = animator.bodyPosition.y;
+                    return;
                 }
+                float leftOffsetPos = leftFootIkPos.y - transform.position.y;
+                float rightOffsetPos = rightFootIkPos.y - transform.position.y;
+                float totalOffsetVal = (leftOffsetPos < rightOffsetPos) ? leftOffsetPos : rightOffsetPos;
 
-                float slopeAngle = Vector3.Angle(Vector3.up, upDirection);
-                float pelvisOffset = Mathf.Tan(slopeAngle * Mathf.Deg2Rad) * totalOffsetVal - pelvisLowerOffset;
+                if (!isMoving)
+                {
+                    Vector3 newPelvisPos = animator.bodyPosition + Vector3.up * totalOffsetVal;
+                    newPelvisPos.y = Mathf.Lerp(lastPelvisPosY, newPelvisPos.y, pelvisUpDownSpeed);
+                    animator.bodyPosition = newPelvisPos;
+                    lastPelvisPosY = animator.bodyPosition.y;
+                }
+                else
+                {
+                    Vector3 upDirection = Vector3.up;
+                    RaycastHit hit;
 
-                Vector3 newPelvisPos = animator.bodyPosition + Vector3.up * pelvisOffset;
-                newPelvisPos.y = Mathf.Lerp(lastPelvisPosY, newPelvisPos.y, pelvisUpDownSpeed);
-                animator.bodyPosition = newPelvisPos;
-                lastPelvisPosY = animator.bodyPosition.y;
+                    if (Physics.Raycast(transform.position, -Vector3.up, out hit))
+                    {
+                        upDirection = hit.normal; // Get the surface normal where the character is standing
+                    }
+
+                    float slopeAngle = Vector3.Angle(Vector3.up, upDirection);
+                    float pelvisOffset = Mathf.Tan(slopeAngle * Mathf.Deg2Rad) * totalOffsetVal - pelvisLowerOffset;
+
+                    Vector3 newPelvisPos = animator.bodyPosition + Vector3.up * pelvisOffset;
+                    newPelvisPos.y = Mathf.Lerp(lastPelvisPosY, newPelvisPos.y, pelvisUpDownSpeed);
+                    animator.bodyPosition = newPelvisPos;
+                    lastPelvisPosY = animator.bodyPosition.y;
+                }
             }
         }
     }
 
     private void FeetPositionSolver(Vector3 fromSkyPos, ref Vector3 ikFeetPos, ref Quaternion feetIkRot)
     {
-        if (onSlope || !isMoving)
+        if (!isJumping)
         {
-            // Raycasting Section
-            RaycastHit footHit;
-            if (showDebugs)
+            if (onSlope || !isMoving)
             {
-                Debug.DrawLine(fromSkyPos, fromSkyPos + Vector3.down * (raycastDownDistance + heightFromGround), Color.yellow);
-            }
+                // Raycasting Section
+                RaycastHit footHit;
+                if (showDebugs)
+                {
+                    Debug.DrawLine(fromSkyPos, fromSkyPos + Vector3.down * (raycastDownDistance + heightFromGround), Color.yellow);
+                }
 
-            if (Physics.Raycast(fromSkyPos, Vector3.down, out footHit, raycastDownDistance + heightFromGround, LayerMasks))
-            {
-                ikFeetPos = fromSkyPos;
-                ikFeetPos.y = footHit.point.y + pelvisOffset;
-                feetIkRot = Quaternion.FromToRotation(Vector3.up, footHit.normal) * transform.rotation;
-                return;
+                if (Physics.Raycast(fromSkyPos, Vector3.down, out footHit, raycastDownDistance + heightFromGround, LayerMasks))
+                {
+                    ikFeetPos = fromSkyPos;
+                    ikFeetPos.y = footHit.point.y + pelvisOffset;
+                    feetIkRot = Quaternion.FromToRotation(Vector3.up, footHit.normal) * transform.rotation;
+                    return;
+                }
+                ikFeetPos = Vector3.zero;
             }
-            ikFeetPos = Vector3.zero;
         }
     }
 
     private void AdjustTargetFeet(ref Vector3 feetPositions, HumanBodyBones foot)
-    {       
-        if (onSlope || !isMoving)
+    {
+        if (!isJumping)
         {
-            feetPositions = animator.GetBoneTransform(foot).position;
-            feetPositions.y = transform.position.y + heightFromGround;
+            if (onSlope || !isMoving)
+            {
+                feetPositions = animator.GetBoneTransform(foot).position;
+                feetPositions.y = transform.position.y + heightFromGround;
+            }
         }
     }
     #endregion

@@ -6,48 +6,43 @@ using UnityEngine;
 public class CameraZoom : MonoBehaviour
 {
     #region Value: Camera Scroll zomm & Camera zoom smoothness
-    // Reference of the freelook camera that the player / Character is using
-    public CinemachineFreeLook freeLookCamera;
-    [SerializeField]
-    public float zoomSpeed = 4.0f;
-    [SerializeField]
-    public float minRadius = 1.9f;
-    [SerializeField]
-    public float maxRadius = 7f;
-    [SerializeField]
-    public float zoomSmooth = 2.5f;
-    public float currentRadius = 5.6f;
-    public float targetRadius = 5.6f;
+
+    [SerializeField] private CinemachineVirtualCamera virtualCamera;
+    [SerializeField] private CinemachineFramingTransposer transposer;
+    [SerializeField] private float defaultDistance = 6.0f;
+    [SerializeField] private float minDistance = 1.0f;
+    [SerializeField] private float maxDistance = 6.0f;
+
+    [SerializeField] private float smoothing = 4f;
+    [SerializeField] private float zoomSensitivity = 1f;
+
+    private float currentTargetDistance;
+
     #endregion
 
-    void Update()
+    private void Start()
     {
-        // Get the mouse Scroll wheel input
-        float zoomValue = Input.GetAxis("Mouse ScrollWheel");
+        transposer = virtualCamera.GetCinemachineComponent<CinemachineFramingTransposer>();
+        currentTargetDistance = defaultDistance;
+    }
 
-        // Change the zoom based on mouse scroll input
-        if (Mathf.Abs(zoomValue) > 0.01f)
+    private void Update()
+    {
+        float zoomInpt = Input.GetAxis("Mouse ScrollWheel");
+
+        float zoomValue = -zoomInpt * zoomSensitivity;
+
+        currentTargetDistance = Mathf.Clamp(currentTargetDistance + zoomValue, minDistance, maxDistance);
+
+        float currentDistance = transposer.m_CameraDistance;
+
+        if (currentDistance == currentTargetDistance)
         {
-            // This updates the radius which is based on the scoll input
-            targetRadius -= zoomValue * zoomSpeed;
-            targetRadius = Mathf.Clamp(targetRadius, minRadius, maxRadius);
+            return;
         }
 
-        // This will smoothen the camera zoom
-        currentRadius = Mathf.Lerp(currentRadius, targetRadius, Time.deltaTime * zoomSmooth);
+        float lerpedZoomValue = Mathf.Lerp(currentDistance, currentTargetDistance, smoothing * Time.deltaTime);
 
-        // list all the orbits with a smoothened value
-        List<CinemachineFreeLook.Orbit> modifiedOrbits = new List<CinemachineFreeLook.Orbit>();
-
-        foreach (var orbit in freeLookCamera.m_Orbits)
-        {
-            CinemachineFreeLook.Orbit modifiedOrbit = new CinemachineFreeLook.Orbit();
-            modifiedOrbit = orbit; // Copy the original values
-            modifiedOrbit.m_Radius = currentRadius;
-            
-            modifiedOrbits.Add(modifiedOrbit);
-        }
-
-        freeLookCamera.m_Orbits = modifiedOrbits.ToArray();
+        transposer.m_CameraDistance = lerpedZoomValue;
     }
 }
