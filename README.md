@@ -21,11 +21,15 @@
 
 <h1>Current Changes:</h1>
 
+[Dec. 27, 2023]
+- Break today no changes
+- Back tomorrow for some small cleaning of the code
+  
+<h1>Previous Changes</h1>
+
 [Dec. 26, 2023]
 - Implemented a new Camera Zoom System for the Virtual Camera
 - Small Tweaks on IK System
-  
-<h1>Previous Changes</h1>
 
 [Dec. 25, 2023]
 - Switch from Freelook Camera to Virtual Camera (This is Much Better)
