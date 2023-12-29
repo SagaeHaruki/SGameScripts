@@ -19,13 +19,15 @@
 - Achievements (10/10 achievements for now)
 - Might USE Procedural animation on some movements [For some consideration this might not be possible on player movement]
 
-<h1>Current Changes:</h1>
+<h1></h1>
+
+- Proceed to [This](https://github.com/SagaeHaruki/GameScriptsRB) link for more updates
+  
+<h1>Past Changes</h1>
 
 [Dec. 27, 2023]
 - Break today no changes
 - Back tomorrow for some small cleaning of the code
-  
-<h1>Previous Changes</h1>
 
 [Dec. 26, 2023]
 - Implemented a new Camera Zoom System for the Virtual Camera
